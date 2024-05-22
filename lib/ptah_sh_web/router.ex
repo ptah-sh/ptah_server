@@ -68,6 +68,13 @@ defmodule PtahShWeb.Router do
       on_mount: [{PtahShWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+
+      live "/servers", ServerLive.Index, :index
+      live "/servers/new", ServerLive.Index, :new
+      live "/servers/:id/edit", ServerLive.Index, :edit
+
+      live "/servers/:id", ServerLive.Show, :show
+      live "/servers/:id/show/edit", ServerLive.Show, :edit
     end
   end
 

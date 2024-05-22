@@ -4,6 +4,9 @@ defmodule PtahShWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
+  require Logger
+  alias PtahSh.Teams.TeamUser
+  alias PtahSh.Repo
   alias PtahSh.Accounts
 
   # Make the remember me cookie valid for 60 days.
@@ -34,6 +37,15 @@ defmodule PtahShWeb.UserAuth do
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
+  end
+
+  # TODO: read team ID from the query string in the future
+  defp put_current_team_id(conn) do
+    team = Repo.get_by!(TeamUser, [user_id: conn.assigns.current_user.id], skip_team_id: true)
+
+    Repo.put_team_id(team.team_id)
+
+    conn
   end
 
   defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}) do
@@ -180,6 +192,7 @@ defmodule PtahShWeb.UserAuth do
         Accounts.get_user_by_session_token(user_token)
       end
     end)
+    |> put_current_team_id()
   end
 
   @doc """
