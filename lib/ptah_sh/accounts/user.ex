@@ -8,6 +8,8 @@ defmodule PtahSh.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
+    many_to_many :teams, PtahSh.Teams.Team, join_through: PtahSh.Teams.TeamUser
+
     timestamps(type: :utc_datetime)
   end
 
@@ -39,6 +41,7 @@ defmodule PtahSh.Accounts.User do
     |> cast(attrs, [:email, :password])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> maybe_put_new_team(user)
   end
 
   defp validate_email(changeset, opts) do
@@ -58,6 +61,14 @@ defmodule PtahSh.Accounts.User do
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
+  end
+
+  defp maybe_put_new_team(changeset, user) do
+    if user.id == nil do
+      put_change(changeset, :teams, [PtahSh.Teams.Team.get_default_team()])
+    else
+      changeset
+    end
   end
 
   defp maybe_hash_password(changeset, opts) do
@@ -80,7 +91,7 @@ defmodule PtahSh.Accounts.User do
   defp maybe_validate_unique_email(changeset, opts) do
     if Keyword.get(opts, :validate_email, true) do
       changeset
-      |> unsafe_validate_unique(:email, PtahSh.Repo)
+      |> unsafe_validate_unique(:email, PtahSh.Repo, repo_opts: [skip_team_id: true])
       |> unique_constraint(:email)
     else
       changeset
