@@ -7,19 +7,19 @@
 # General application configuration
 import Config
 
-config :ptah_sh,
-  ecto_repos: [PtahSh.Repo],
+config :ptah_server,
+  ecto_repos: [PtahServer.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
-config :ptah_sh, PtahShWeb.Endpoint,
+config :ptah_server, PtahServerWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: PtahShWeb.ErrorHTML, json: PtahShWeb.ErrorJSON],
+    formats: [html: PtahServerWeb.ErrorHTML, json: PtahServerWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: PtahSh.PubSub,
+  pubsub_server: PtahServer.PubSub,
   live_view: [signing_salt: "FFRXpnT3"]
 
 # Configures the mailer
@@ -29,12 +29,12 @@ config :ptah_sh, PtahShWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :ptah_sh, PtahSh.Mailer, adapter: Swoosh.Adapters.Local
+config :ptah_server, PtahServer.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
-  ptah_sh: [
+  ptah_server: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
@@ -44,7 +44,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "3.4.0",
-  ptah_sh: [
+  ptah_server: [
     args: ~w(
       --config=tailwind.config.js
       --input=css/app.css

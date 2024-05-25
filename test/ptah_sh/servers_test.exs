@@ -1,12 +1,12 @@
-defmodule PtahSh.ServersTest do
-  use PtahSh.DataCase
+defmodule PtahServer.ServersTest do
+  use PtahServer.DataCase
 
-  alias PtahSh.Servers
+  alias PtahServer.Servers
 
   describe "servers" do
-    alias PtahSh.Servers.Server
+    alias PtahServer.Servers.Server
 
-    import PtahSh.ServersFixtures
+    import PtahServer.ServersFixtures
 
     @invalid_attrs %{name: nil, agent_token: nil}
 

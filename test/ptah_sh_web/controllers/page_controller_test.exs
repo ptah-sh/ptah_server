@@ -1,5 +1,5 @@
-defmodule PtahShWeb.PageControllerTest do
-  use PtahShWeb.ConnCase
+defmodule PtahServerWeb.PageControllerTest do
+  use PtahServerWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

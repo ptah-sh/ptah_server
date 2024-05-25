@@ -1,10 +1,10 @@
-defmodule PtahSh.AccountsTest do
-  use PtahSh.DataCase
+defmodule PtahServer.AccountsTest do
+  use PtahServer.DataCase
 
-  alias PtahSh.Accounts
+  alias PtahServer.Accounts
 
-  import PtahSh.AccountsFixtures
-  alias PtahSh.Accounts.{User, UserToken}
+  import PtahServer.AccountsFixtures
+  alias PtahServer.Accounts.{User, UserToken}
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do

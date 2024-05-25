@@ -1,4 +1,4 @@
-defmodule PtahSh.Repo.Migrations.CreateServers do
+defmodule PtahServer.Repo.Migrations.CreateServers do
   use Ecto.Migration
 
   def change do

@@ -1,8 +1,8 @@
-defmodule PtahShWeb.ServerLiveTest do
-  use PtahShWeb.ConnCase
+defmodule PtahServerWeb.ServerLiveTest do
+  use PtahServerWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import PtahSh.ServersFixtures
+  import PtahServer.ServersFixtures
 
   @create_attrs %{name: "some name", agent_token: "some agent_token"}
   @update_attrs %{name: "some updated name", agent_token: "some updated agent_token"}

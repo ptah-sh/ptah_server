@@ -1,8 +1,8 @@
-defmodule PtahShWeb.UserRegistrationLiveTest do
-  use PtahShWeb.ConnCase, async: true
+defmodule PtahServerWeb.UserRegistrationLiveTest do
+  use PtahServerWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PtahSh.AccountsFixtures
+  import PtahServer.AccountsFixtures
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do

@@ -1,11 +1,11 @@
 import Config
 
 # Configure your database
-config :ptah_sh, PtahSh.Repo,
+config :ptah_server, PtahServer.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "ptah_sh_dev",
+  database: "ptah_server_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -16,7 +16,7 @@ config :ptah_sh, PtahSh.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :ptah_sh, PtahShWeb.Endpoint,
+config :ptah_server, PtahServerWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
@@ -25,8 +25,8 @@ config :ptah_sh, PtahShWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "T853UCMtM0mDmYWAwjM/VtVtPibw2Ps3imwwPEGngeAjz2CbLyswFKTGLea8HXwh",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:ptah_sh, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:ptah_sh, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:ptah_server, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:ptah_server, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -53,17 +53,17 @@ config :ptah_sh, PtahShWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :ptah_sh, PtahShWeb.Endpoint,
+config :ptah_server, PtahServerWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/ptah_sh_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/ptah_server_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :ptah_sh, dev_routes: true
+config :ptah_server, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

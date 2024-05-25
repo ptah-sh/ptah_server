@@ -1,10 +1,10 @@
-defmodule PtahShWeb.UserResetPasswordLiveTest do
-  use PtahShWeb.ConnCase, async: true
+defmodule PtahServerWeb.UserResetPasswordLiveTest do
+  use PtahServerWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PtahSh.AccountsFixtures
+  import PtahServer.AccountsFixtures
 
-  alias PtahSh.Accounts
+  alias PtahServer.Accounts
 
   setup do
     user = user_fixture()

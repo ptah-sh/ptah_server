@@ -1,7 +1,7 @@
-defmodule PtahSh.ServersFixtures do
+defmodule PtahServer.ServersFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `PtahSh.Servers` context.
+  entities via the `PtahServer.Servers` context.
   """
 
   @doc """
@@ -14,7 +14,7 @@ defmodule PtahSh.ServersFixtures do
         agent_token: "some agent_token",
         name: "some name"
       })
-      |> PtahSh.Servers.create_server()
+      |> PtahServer.Servers.create_server()
 
     server
   end

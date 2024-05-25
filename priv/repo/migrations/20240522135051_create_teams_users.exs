@@ -1,4 +1,4 @@
-defmodule PtahSh.Repo.Migrations.CreateTeamsUsers do
+defmodule PtahServer.Repo.Migrations.CreateTeamsUsers do
   use Ecto.Migration
 
   def change do

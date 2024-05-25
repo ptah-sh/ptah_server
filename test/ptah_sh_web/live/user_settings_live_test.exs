@@ -1,9 +1,9 @@
-defmodule PtahShWeb.UserSettingsLiveTest do
-  use PtahShWeb.ConnCase, async: true
+defmodule PtahServerWeb.UserSettingsLiveTest do
+  use PtahServerWeb.ConnCase, async: true
 
-  alias PtahSh.Accounts
+  alias PtahServer.Accounts
   import Phoenix.LiveViewTest
-  import PtahSh.AccountsFixtures
+  import PtahServer.AccountsFixtures
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do

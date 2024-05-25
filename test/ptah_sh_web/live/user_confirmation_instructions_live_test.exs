@@ -1,11 +1,11 @@
-defmodule PtahShWeb.UserConfirmationInstructionsLiveTest do
-  use PtahShWeb.ConnCase, async: true
+defmodule PtahServerWeb.UserConfirmationInstructionsLiveTest do
+  use PtahServerWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PtahSh.AccountsFixtures
+  import PtahServer.AccountsFixtures
 
-  alias PtahSh.Accounts
-  alias PtahSh.Repo
+  alias PtahServer.Accounts
+  alias PtahServer.Repo
 
   setup do
     %{user: user_fixture()}

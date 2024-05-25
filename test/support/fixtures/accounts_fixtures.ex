@@ -1,7 +1,7 @@
-defmodule PtahSh.AccountsFixtures do
+defmodule PtahServer.AccountsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `PtahSh.Accounts` context.
+  entities via the `PtahServer.Accounts` context.
   """
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
@@ -18,7 +18,7 @@ defmodule PtahSh.AccountsFixtures do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> PtahSh.Accounts.register_user()
+      |> PtahServer.Accounts.register_user()
 
     user
   end

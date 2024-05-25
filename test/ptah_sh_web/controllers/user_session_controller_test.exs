@@ -1,7 +1,7 @@
-defmodule PtahShWeb.UserSessionControllerTest do
-  use PtahShWeb.ConnCase, async: true
+defmodule PtahServerWeb.UserSessionControllerTest do
+  use PtahServerWeb.ConnCase, async: true
 
-  import PtahSh.AccountsFixtures
+  import PtahServer.AccountsFixtures
 
   setup do
     %{user: user_fixture()}
@@ -35,7 +35,7 @@ defmodule PtahShWeb.UserSessionControllerTest do
           }
         })
 
-      assert conn.resp_cookies["_ptah_sh_web_user_remember_me"]
+      assert conn.resp_cookies["_ptah_server_web_user_remember_me"]
       assert redirected_to(conn) == ~p"/"
     end
 

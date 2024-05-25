@@ -1,9 +1,9 @@
-defmodule PtahSh.MixProject do
+defmodule PtahServer.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :ptah_sh,
+      app: :ptah_server,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule PtahSh.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {PtahSh.Application, []},
+      mod: {PtahServer.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -75,10 +75,10 @@ defmodule PtahSh.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind ptah_sh", "esbuild ptah_sh"],
+      "assets.build": ["tailwind ptah_server", "esbuild ptah_server"],
       "assets.deploy": [
-        "tailwind ptah_sh --minify",
-        "esbuild ptah_sh --minify",
+        "tailwind ptah_server --minify",
+        "esbuild ptah_server --minify",
         "phx.digest"
       ]
     ]

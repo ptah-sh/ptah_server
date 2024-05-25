@@ -1,2 +1,2 @@
 ExUnit.start()
-Ecto.Adapters.SQL.Sandbox.mode(PtahSh.Repo, :manual)
+Ecto.Adapters.SQL.Sandbox.mode(PtahServer.Repo, :manual)
