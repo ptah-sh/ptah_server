@@ -1,11 +1,14 @@
 defmodule PtahServerAgent do
-  use GenServer
-
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  def channel do
+    quote do
+      use Phoenix.Channel
+    end
   end
 
-  def init(_opts) do
-    {:ok, %{}}
+  @doc """
+  When used, dispatch to the appropriate controller/live_view/etc.
+  """
+  defmacro __using__(which) when is_atom(which) do
+    apply(__MODULE__, which, [])
   end
 end
