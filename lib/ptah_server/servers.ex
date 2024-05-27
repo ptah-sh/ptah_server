@@ -18,7 +18,7 @@ defmodule PtahServer.Servers do
 
   """
   def list_servers do
-    Repo.all(Server)
+    Repo.all(from s in Server, order_by: [asc: s.name])
   end
 
   @doc """

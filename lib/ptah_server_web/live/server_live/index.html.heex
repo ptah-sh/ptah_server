@@ -10,18 +10,30 @@
 <.table
   id="servers"
   rows={@streams.servers}
-  row_click={fn {_id, server} -> JS.navigate(~p"/servers/#{server}") end}
+  row_click={fn {_id, %{server: server} = _view} -> JS.navigate(~p"/servers/#{server}") end}
 >
-  <:col :let={{_id, server}} label="Name"><%= server.name %></:col>
-  <:col :let={{_id, server}} label="Agent token"><%= server.agent_token %></:col>
-  <:col :let={{_id, server}} label="Last Seen"><%= server.last_seen_at %></:col>
-  <:action :let={{_id, server}}>
+  <:col :let={{_id, %{server: server} = _view}} label="Name"><%= server.name %></:col>
+  <:col :let={{_id, %{server: server} = _view}} label="Agent token">
+    <%= server.agent_token %>
+  </:col>
+  <:col :let={{_id, %{server: server, agent: agent} = _view}} label="Agent Status">
+    <%= if (agent) do %>
+      online
+    <% else %>
+      <%= if (server.last_seen_at) do %>
+        <%= server.last_seen_at %>
+      <% else %>
+        never
+      <% end %>
+    <% end %>
+  </:col>
+  <:action :let={{_id, %{server: server} = _view}}>
     <div class="sr-only">
       <.link navigate={~p"/servers/#{server}"}>Show</.link>
     </div>
     <.link patch={~p"/servers/#{server}/edit"}>Edit</.link>
   </:action>
-  <:action :let={{id, server}}>
+  <:action :let={{id, %{server: server} = _view}}>
     <.link
       phx-click={JS.push("delete", value: %{id: server.id}) |> hide("##{id}")}
       data-confirm="Are you sure?"

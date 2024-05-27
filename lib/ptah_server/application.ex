@@ -17,7 +17,8 @@ defmodule PtahServer.Application do
       # Start a worker by calling: PtahServer.Worker.start_link(arg)
       # {PtahServer.Worker, arg},
       # Start to serve requests, typically the last entry
-      PtahServerWeb.Endpoint
+      PtahServerWeb.Endpoint,
+      PtahServerWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

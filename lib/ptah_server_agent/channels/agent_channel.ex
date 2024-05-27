@@ -1,16 +1,24 @@
 defmodule PtahServerAgent.AgentChannel do
-  alias PtahServer.Repo
+  alias PtahServerWeb.Presence
   require Logger
   use PtahServerAgent, :channel
+  alias PtahServer.Servers.Server
 
   @impl true
   def join("agent:daemon", payload, socket) do
     Logger.info("daemon join: #{inspect(payload)}")
 
-    if authorized?(Map.get(payload, "token")) do
-      # TODO: update agent state in persistence.
+    token = Map.get(payload, "token")
 
-      {:ok, socket}
+    if token do
+      server = Server.get_by_token(token)
+      Logger.info("server: #{inspect(server)}")
+
+      send(self(), :after_join)
+
+      {:ok, _} = Presence.track_server(server)
+
+      {:ok, assign(socket, server: server)}
     else
       {:error, %{reason: "unauthorized"}}
     end
@@ -20,7 +28,7 @@ defmodule PtahServerAgent.AgentChannel do
   # by sending replies to requests from the client
   @impl true
   def handle_in("ping", payload, socket) do
-    Logger.info("ping")
+    # Logger.info("ping")
 
     {:reply, {:ok, payload}, socket}
   end
@@ -33,11 +41,21 @@ defmodule PtahServerAgent.AgentChannel do
     {:noreply, socket}
   end
 
-  # Add authorization logic here as required.
-  defp authorized?(token) do
-    Logger.info("AUTHORIZED: #{inspect(token)}")
+  @impl true
+  def handle_info(:after_join, socket) do
+    Logger.info("AFTER JOIN !!!!!")
 
-    # TODO: Repo.get by token false if not exists
-    true
+    {:noreply, socket}
+  end
+
+  @impl true
+  def terminate(reason, socket) do
+    Logger.info("terminate: #{inspect(reason)}")
+
+    # server = socket.assigns.server
+
+    Presence.untrack_server(socket.assigns.server)
+
+    {:noreply, socket}
   end
 end

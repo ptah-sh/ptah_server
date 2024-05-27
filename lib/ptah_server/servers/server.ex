@@ -43,4 +43,13 @@ defmodule PtahServer.Servers.Server do
       )
     end
   end
+
+  def get_by_token(token) do
+    Repo.get_by(__MODULE__, [agent_token: token], skip_team_id: true)
+  end
+
+  def update_last_seen(server) do
+    change(server, %{last_seen_at: NaiveDateTime.utc_now(:second)})
+    |> Repo.update()
+  end
 end
