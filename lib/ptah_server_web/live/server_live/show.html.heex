@@ -11,7 +11,31 @@
 <.list>
   <:item title="Name"><%= @server.name %></:item>
   <:item title="Agent token"><%= @server.agent_token %></:item>
+  <:item title="Agent version">
+    <%= if (@agent) do %>
+      <%= @agent.agent.version %>
+    <% else %>
+      Agnet is Offline
+    <% end %>
+  </:item>
 </.list>
+
+<%= if (@agent) do %>
+  <.list>
+    <:item title="Docker Platform"><%= @agent.docker.platform %></:item>
+    <:item title="Docker Version"><%= @agent.docker.version %></:item>
+  </.list>
+
+  <.list>
+    <:item title="Swarm">
+      <%= if (@agent.swarm) do %>
+        describe existing swarm
+      <% else %>
+        <.button phx-click="create_swarm">Create new Swarm</.button>
+      <% end %>
+    </:item>
+  </.list>
+<% end %>
 
 <.back navigate={~p"/servers"}>Back to servers</.back>
 

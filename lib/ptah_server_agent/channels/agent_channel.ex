@@ -6,17 +6,16 @@ defmodule PtahServerAgent.AgentChannel do
 
   @impl true
   def join("agent:daemon", payload, socket) do
+    # TODO: check if the agent has already joined. Allow join only once - one agent per one server.
+
     Logger.info("daemon join: #{inspect(payload)}")
 
-    token = Map.get(payload, "token")
+    {token, payload} = Map.pop(payload, "token")
 
     if token do
       server = Server.get_by_token(token)
-      Logger.info("server: #{inspect(server)}")
 
-      send(self(), :after_join)
-
-      {:ok, _} = Presence.track_server(server)
+      send(self(), {:after_join, payload})
 
       {:ok, assign(socket, server: server)}
     else
@@ -28,8 +27,6 @@ defmodule PtahServerAgent.AgentChannel do
   # by sending replies to requests from the client
   @impl true
   def handle_in("ping", payload, socket) do
-    # Logger.info("ping")
-
     {:reply, {:ok, payload}, socket}
   end
 
@@ -38,24 +35,40 @@ defmodule PtahServerAgent.AgentChannel do
   @impl true
   def handle_in("shout", payload, socket) do
     broadcast(socket, "shout", payload)
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_info(:after_join, socket) do
-    Logger.info("AFTER JOIN !!!!!")
 
     {:noreply, socket}
   end
 
   @impl true
-  def terminate(reason, socket) do
-    Logger.info("terminate: #{inspect(reason)}")
+  def handle_info({:after_join, payload}, socket) do
+    {:ok, _} =
+      Presence.track_server(socket.assigns.server, %{
+        socket: socket,
+        docker: %{
+          platform: payload["docker"]["platform"],
+          version: payload["docker"]["version"]
+        },
+        agent: %{
+          version: payload["agent"]["version"]
+        },
+        swarm: map_swarm(payload["swarm"])
+      })
 
-    # server = socket.assigns.server
+    {:noreply, socket}
+  end
 
+  @impl true
+  def terminate(_reason, socket) do
     Presence.untrack_server(socket.assigns.server)
 
     {:noreply, socket}
+  end
+
+  defp map_swarm(swarm) do
+    if swarm do
+      %{}
+    else
+      nil
+    end
   end
 end

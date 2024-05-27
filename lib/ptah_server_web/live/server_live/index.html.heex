@@ -13,9 +13,6 @@
   row_click={fn {_id, %{server: server} = _view} -> JS.navigate(~p"/servers/#{server}") end}
 >
   <:col :let={{_id, %{server: server} = _view}} label="Name"><%= server.name %></:col>
-  <:col :let={{_id, %{server: server} = _view}} label="Agent token">
-    <%= server.agent_token %>
-  </:col>
   <:col :let={{_id, %{server: server, agent: agent} = _view}} label="Agent Status">
     <%= if (agent) do %>
       online

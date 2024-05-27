@@ -18,43 +18,97 @@ defmodule PtahServerWeb.Presence do
     {:ok, %{}}
   end
 
-  def handle_metas(topic, %{joins: joins, leaves: leaves} = _diff, presences, state) do
+  def handle_metas("team:" <> team_id, %{joins: joins, leaves: leaves} = _diff, _presences, state) do
+    Logger.info("TOTOPTOTOTOIC #{inspect(team_id)}")
+
     for {server_id, %{metas: metas}} <- joins do
       Phoenix.PubSub.broadcast(
         PtahServer.PubSub,
-        "proxy:team:14",
+        team_live_topic(team_id),
         {__MODULE__, {:join, server_id, metas}}
       )
+
+      Phoenix.PubSub.broadcast(
+        PtahServer.PubSub,
+        server_live_topic(server_id),
+        {__MODULE__, {:join, metas}}
+      )
+
+      Logger.debug("METASMETASMETAS, #{inspect(metas)}")
     end
 
     for {server_id, %{metas: metas}} <- leaves do
       Phoenix.PubSub.broadcast(
         PtahServer.PubSub,
-        "proxy:team:14",
+        team_live_topic(team_id),
         {__MODULE__, {:leave, server_id, metas}}
+      )
+
+      Phoenix.PubSub.broadcast(
+        PtahServer.PubSub,
+        server_live_topic(server_id),
+        {__MODULE__, {:leave, metas}}
       )
     end
 
     {:ok, state}
   end
 
-  def track_server(server) do
+  def track_server(server, agent) do
     Server.update_last_seen(server)
 
-    track(self(), "team:14", server.id, %{})
+    track(self(), team_topic(server.team_id), server.id, agent)
   end
 
   def untrack_server(server) do
     Server.update_last_seen(server)
 
-    untrack(self(), "team:14", server.id)
+    untrack(self(), team_topic(server.team_id), server.id)
   end
 
   def list_online_servers(team_id) do
-    list("team:#{team_id}")
+    list(team_topic(team_id))
   end
 
-  def subscribe() do
-    Phoenix.PubSub.subscribe(PtahServer.PubSub, "proxy:team:14")
+  def get_agent(server_id) do
+    # Not sure if this implicit dependency is any good
+    team_id = PtahServer.Repo.get_team_id()
+
+    meta = Enum.at(get_by_key(team_topic(team_id), server_id), 0)
+
+    if meta do
+      {_, [meta]} = meta
+
+      meta
+    end
+  end
+
+  def subscribe_team() do
+    # Not sure if this implicit dependency is any good
+    team_id = PtahServer.Repo.get_team_id()
+
+    Phoenix.PubSub.subscribe(PtahServer.PubSub, team_live_topic(team_id))
+  end
+
+  def subscribe_server(server_id) do
+    Phoenix.PubSub.subscribe(PtahServer.PubSub, server_live_topic(server_id))
+  end
+
+  def cmd(server, cmd, payload) do
+    %{metas: [%{socket: socket}]} = get_by_key(team_topic(server.team_id), server.id)
+    Logger.debug("cmd!!!!!!!!!!!!!!: #{inspect(socket)}")
+    Phoenix.Channel.push(socket, cmd, payload)
+  end
+
+  defp team_topic(team_id) do
+    "team:#{team_id}"
+  end
+
+  defp team_live_topic(team_id) do
+    "live:#{team_topic(team_id)}"
+  end
+
+  defp server_live_topic(server_id) do
+    "live:server:#{server_id}"
   end
 end

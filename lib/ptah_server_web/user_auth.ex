@@ -39,7 +39,7 @@ defmodule PtahServerWeb.UserAuth do
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
 
-  # TODO: read team ID from the query string in the future
+  # TODO: read team ID from the URL in the future - e.g. /teams/:team_id/servers
   defp put_current_team_id(conn) do
     if conn.assigns.current_user do
       team = Repo.get_by!(TeamUser, [user_id: conn.assigns.current_user.id], skip_team_id: true)

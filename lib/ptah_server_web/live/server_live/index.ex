@@ -1,5 +1,4 @@
 defmodule PtahServerWeb.ServerLive.Index do
-  alias PtahServer.Repo
   alias PtahServerWeb.Presence
   use PtahServerWeb, :live_view
   require Logger
@@ -15,7 +14,7 @@ defmodule PtahServerWeb.ServerLive.Index do
 
     socket =
       if connected?(socket) do
-        PtahServerWeb.Presence.subscribe()
+        PtahServerWeb.Presence.subscribe_team()
 
         socket
       else
