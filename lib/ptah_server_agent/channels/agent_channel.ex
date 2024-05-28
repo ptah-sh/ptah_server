@@ -1,4 +1,6 @@
 defmodule PtahServerAgent.AgentChannel do
+  alias PtahServer.Swarms.Swarm
+  alias PtahServer.Repo
   alias PtahServerWeb.Presence
   require Logger
   use PtahServerAgent, :channel
@@ -14,6 +16,8 @@ defmodule PtahServerAgent.AgentChannel do
 
     if token do
       server = Server.get_by_token(token)
+
+      Repo.put_team_id(server.team_id)
 
       send(self(), {:after_join, payload})
 
@@ -35,6 +39,22 @@ defmodule PtahServerAgent.AgentChannel do
   @impl true
   def handle_in("shout", payload, socket) do
     broadcast(socket, "shout", payload)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_in("swarm:created", payload, socket) do
+    swarm = Repo.get_by(Swarm, id: payload["meta"]["swarm_id"])
+
+    {:ok, _} =
+      swarm
+      |> Ecto.Changeset.change(ext_id: payload["data"]["swarm_id"])
+      |> Repo.update()
+
+    Presence.update_server(socket.assigns.server, %{
+      swarm: %{}
+    })
 
     {:noreply, socket}
   end

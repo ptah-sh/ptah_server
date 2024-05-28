@@ -12,10 +12,16 @@
   <:item title="Name"><%= @server.name %></:item>
   <:item title="Agent token"><%= @server.agent_token %></:item>
   <:item title="Agent version">
+    <%= inspect(@agent) %>
     <%= if (@agent) do %>
       <%= @agent.agent.version %>
     <% else %>
-      Agnet is Offline
+      Agent is Offline
+
+      Provision script:
+      <code>
+        wget -qO - https://gitlab.com/ptah-sh/ptah_agent/-/raw/main/install.sh | bash
+      </code>
     <% end %>
   </:item>
 </.list>

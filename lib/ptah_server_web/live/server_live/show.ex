@@ -47,7 +47,8 @@ defmodule PtahServerWeb.ServerLive.Show do
   def handle_event("create_swarm", _unsigned_params, socket) do
     Logger.debug("handle_event: #{inspect(socket.assigns.server)}")
 
-    PtahServerWeb.Presence.cmd(socket.assigns.server, "swarm:create", %{})
+    # PtahServerWeb.Presence.cmd(socket.assigns.server, "swarm:create", %{})
+    PtahServerWeb.Presence.swarm_create(socket.assigns.server)
 
     {:noreply, socket}
   end

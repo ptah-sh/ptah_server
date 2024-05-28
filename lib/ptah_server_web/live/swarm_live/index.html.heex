@@ -1,0 +1,43 @@
+<.header>
+  Listing Swarms
+  <:actions>
+    <.link patch={~p"/swarms/new"}>
+      <.button>New Swarm</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="swarms"
+  rows={@streams.swarms}
+  row_click={fn {_id, swarm} -> JS.navigate(~p"/swarms/#{swarm}") end}
+>
+  <:col :let={{_id, swarm}} label="Team"><%= swarm.team_id %></:col>
+  <:col :let={{_id, swarm}} label="Name"><%= swarm.name %></:col>
+  <:col :let={{_id, swarm}} label="Ext"><%= swarm.ext_id %></:col>
+  <:action :let={{_id, swarm}}>
+    <div class="sr-only">
+      <.link navigate={~p"/swarms/#{swarm}"}>Show</.link>
+    </div>
+    <.link patch={~p"/swarms/#{swarm}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, swarm}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: swarm.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="swarm-modal" show on_cancel={JS.patch(~p"/swarms")}>
+  <.live_component
+    module={PtahServerWeb.SwarmLive.FormComponent}
+    id={@swarm.id || :new}
+    title={@page_title}
+    action={@live_action}
+    swarm={@swarm}
+    patch={~p"/swarms"}
+  />
+</.modal>

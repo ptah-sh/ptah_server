@@ -69,12 +69,33 @@ defmodule PtahServerWeb.Router do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
+      live "/swarms", SwarmLive.Index, :index
+      live "/swarms/new", SwarmLive.Index, :new
+      live "/swarms/:id/edit", SwarmLive.Index, :edit
+
+      live "/swarms/:id", SwarmLive.Show, :show
+      live "/swarms/:id/show/edit", SwarmLive.Show, :edit
+
       live "/servers", ServerLive.Index, :index
       live "/servers/new", ServerLive.Index, :new
       live "/servers/:id/edit", ServerLive.Index, :edit
 
       live "/servers/:id", ServerLive.Show, :show
       live "/servers/:id/show/edit", ServerLive.Show, :edit
+
+      live "/stacks", StackLive.Index, :index
+      live "/stacks/new", StackLive.Index, :new
+      live "/stacks/:id/edit", StackLive.Index, :edit
+
+      live "/stacks/:id", StackLive.Show, :show
+      live "/stacks/:id/show/edit", StackLive.Show, :edit
+
+      live "/services", ServiceLive.Index, :index
+      live "/services/new", ServiceLive.Index, :new
+      live "/services/:id/edit", ServiceLive.Index, :edit
+
+      live "/services/:id", ServiceLive.Show, :show
+      live "/services/:id/show/edit", ServiceLive.Show, :edit
     end
   end
 

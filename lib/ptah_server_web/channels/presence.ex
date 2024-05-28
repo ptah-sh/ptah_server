@@ -10,6 +10,7 @@ defmodule PtahServerWeb.Presence do
     otp_app: :ptah_server,
     pubsub_server: PtahServer.PubSub
 
+  alias PtahServer.Repo
   alias PtahServer.Servers.Server
 
   require Logger
@@ -19,7 +20,19 @@ defmodule PtahServerWeb.Presence do
   end
 
   def handle_metas("team:" <> team_id, %{joins: joins, leaves: leaves} = _diff, _presences, state) do
-    Logger.info("TOTOPTOTOTOIC #{inspect(team_id)}")
+    for {server_id, %{metas: metas}} <- leaves do
+      Phoenix.PubSub.broadcast(
+        PtahServer.PubSub,
+        team_live_topic(team_id),
+        {__MODULE__, {:leave, server_id, metas}}
+      )
+
+      Phoenix.PubSub.broadcast(
+        PtahServer.PubSub,
+        server_live_topic(server_id),
+        {__MODULE__, {:leave, metas}}
+      )
+    end
 
     for {server_id, %{metas: metas}} <- joins do
       Phoenix.PubSub.broadcast(
@@ -37,20 +50,6 @@ defmodule PtahServerWeb.Presence do
       Logger.debug("METASMETASMETAS, #{inspect(metas)}")
     end
 
-    for {server_id, %{metas: metas}} <- leaves do
-      Phoenix.PubSub.broadcast(
-        PtahServer.PubSub,
-        team_live_topic(team_id),
-        {__MODULE__, {:leave, server_id, metas}}
-      )
-
-      Phoenix.PubSub.broadcast(
-        PtahServer.PubSub,
-        server_live_topic(server_id),
-        {__MODULE__, {:leave, metas}}
-      )
-    end
-
     {:ok, state}
   end
 
@@ -58,6 +57,12 @@ defmodule PtahServerWeb.Presence do
     Server.update_last_seen(server)
 
     track(self(), team_topic(server.team_id), server.id, agent)
+  end
+
+  def update_server(server, agent) do
+    current = get_agent(server.id)
+
+    update(self(), team_topic(server.team_id), server.id, Map.merge(current, agent))
   end
 
   def untrack_server(server) do
@@ -94,10 +99,21 @@ defmodule PtahServerWeb.Presence do
     Phoenix.PubSub.subscribe(PtahServer.PubSub, server_live_topic(server_id))
   end
 
-  def cmd(server, cmd, payload) do
+  def swarm_create(server) do
+    {:ok, swarm} =
+      Repo.insert(%PtahServer.Swarms.Swarm{
+        name: "auto created via #{server.id}",
+        team_id: server.team_id,
+        ext_id: ""
+      })
+
     %{metas: [%{socket: socket}]} = get_by_key(team_topic(server.team_id), server.id)
-    Logger.debug("cmd!!!!!!!!!!!!!!: #{inspect(socket)}")
-    Phoenix.Channel.push(socket, cmd, payload)
+
+    Phoenix.Channel.push(socket, "swarm:create", %{
+      meta: %{
+        swarm_id: swarm.id
+      }
+    })
   end
 
   defp team_topic(team_id) do
