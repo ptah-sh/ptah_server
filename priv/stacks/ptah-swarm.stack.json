@@ -7,30 +7,35 @@
   "author": "Bohdan Shulha <b.shulha@pm.me>",
   "homepage": "https://ptah.sh",
   "license": "MIT",
-  "services": {
-    "caddy": {
+  "services": [
+    {
+      "name": "caddy",
       "description": "The reverse proxy that powers Ptah Swarm cluster.",
       "image": "caddy:2.8-alpine",
-      "ports": {
-        "http": {
+      "ports": [
+        {
+          "name": "http",
           "target": 80,
           "description": "Caddy HTTP port"
         },
-        "https": {
+        {
+          "name": "https",
           "target": 443,
           "description": "Caddy HTTPS port"
         }
-      },
-      "volumes": {
-        "data": {
+      ],
+      "volumes": [
+        {
+          "name": "data",
           "target": "/data",
           "description": "Caddy data directory. Should not be treated as a cache."
         },
-        "config": {
+        {
+          "name": "config",
           "target": "/config",
           "description": "Caddy config directory."
         }
-      }
+      ]
     }
-  }
+  ]
 }

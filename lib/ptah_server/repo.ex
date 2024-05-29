@@ -1,5 +1,6 @@
 defmodule PtahServer.Repo do
   require Ecto.Query
+  require Logger
 
   use Ecto.Repo,
     otp_app: :ptah_server,
