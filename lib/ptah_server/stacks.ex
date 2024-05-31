@@ -53,7 +53,6 @@ defmodule PtahServer.Stacks do
   def create_stack(attrs \\ %{}) do
     %Stack{}
     |> Stack.changeset(attrs)
-    |> Ecto.Changeset.put_change(:team_id, Repo.get_team_id())
     |> Repo.insert()
   end
 

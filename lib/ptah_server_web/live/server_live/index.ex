@@ -59,8 +59,7 @@ defmodule PtahServerWeb.ServerLive.Index do
 
   @impl true
   def handle_info({PtahServerWeb.ServerLive.FormComponent, {:saved, server}}, socket) do
-    # TODO: map server to view
-    {:noreply, stream_insert(socket, :servers, server)}
+    {:noreply, stream_insert(socket, :servers, map_server_view(server))}
   end
 
   @impl true

@@ -2,6 +2,7 @@ defmodule PtahServer.Stacks.Stack do
   alias PtahServer.Services.Service
   use Ecto.Schema
   import Ecto.Changeset
+  import PtahServer.Changeset
 
   schema "stacks" do
     field :name, :string
@@ -9,6 +10,7 @@ defmodule PtahServer.Stacks.Stack do
     field :stack_name, :string
     field :stack_version, :string
 
+    belongs_to :swarm, PtahServer.Swarms.Swarm
     belongs_to :team, PtahServer.Teams.Team
 
     has_many :services, Service
@@ -19,8 +21,9 @@ defmodule PtahServer.Stacks.Stack do
   @doc false
   def changeset(stack, attrs) do
     stack
-    |> cast(attrs, [:name, :stack_name, :stack_version])
+    |> cast(attrs, [:swarm_id, :name, :stack_name, :stack_version])
     |> cast_assoc(:services, required: true, with: &Service.changeset/2)
-    |> validate_required([:name, :stack_name, :stack_version])
+    |> validate_required([:swarm_id, :name, :stack_name, :stack_version])
+    |> validate_unique_in_team([:name])
   end
 end

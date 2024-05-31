@@ -31,7 +31,19 @@ defmodule PtahServerWeb.StackLive.Components.PortComponent do
       </td>
       <td>
         <%= if @expose do %>
-          <.input type="number" field={@field[:published_port]} placeholder="test" label="" />
+          <input
+            type="hidden"
+            id={@field[:name].id}
+            name={@field[:name].name}
+            value={@stack_schema["name"]}
+          />
+
+          <.input
+            type="number"
+            field={@field[:published_port]}
+            placeholder="Enter Public Port"
+            label=""
+          />
         <% end %>
       </td>
     </tr>

@@ -7,7 +7,7 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
     ~H"""
     <div>
       <h3 class="text-lg border-t-2">
-        Service: <%= @field.params["name"] %>
+        Service: <%= @stack_schema["name"] %>
         <span class="text-sm italic">
           (<%= @stack_schema["image"] %>)
         </span>

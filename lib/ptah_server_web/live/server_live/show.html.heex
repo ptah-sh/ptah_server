@@ -10,15 +10,27 @@
 
 <.list>
   <:item title="Name"><%= @server.name %></:item>
+  <:item title="Role"><%= @server.role %></:item>
+  <:item title="Swarm">
+    <%= if @server.swarm do %>
+      <.link
+        navigate={~p"/swarms/#{@server.swarm}"}
+        class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+      >
+        <%= @server.swarm.name %>
+      </.link>
+    <% else %>
+    <% end %>
+  </:item>
   <:item title="Agent token"><%= @server.agent_token %></:item>
   <:item title="Agent version">
-    <%= inspect(@agent) %>
     <%= if (@agent) do %>
       <%= @agent.agent.version %>
     <% else %>
       Agent is Offline
-
-      Provision script:
+      <div>
+        Provision script:
+      </div>
       <code>
         wget -qO - https://gitlab.com/ptah-sh/ptah_agent/-/raw/main/install.sh | bash
       </code>

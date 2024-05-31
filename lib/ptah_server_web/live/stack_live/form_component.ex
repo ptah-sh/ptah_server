@@ -1,5 +1,6 @@
 defmodule PtahServerWeb.StackLive.FormComponent do
   require Logger
+  alias PtahServerWeb.Presence
   alias PtahServerWeb.StackLive.Components.ServiceComponent
   alias PtahServer.Marketplace
   alias PtahServer.Swarms.Swarm
@@ -72,8 +73,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
         <:actions>
           <.button phx-disable-with="Saving...">Deploy Stack</.button>
         </:actions>
-
-        <%= inspect(@form.errors) %>
       </.simple_form>
     </div>
     """
@@ -83,8 +82,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
   def update(%{stack: stack} = assigns, socket) do
     changeset = Stacks.change_stack(stack)
 
-    Logger.debug("UPDATE STACK: #{inspect(stack)}")
-
     {:ok,
      socket
      |> assign(assigns)
@@ -93,8 +90,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"stack" => stack_params}, socket) do
-    Logger.debug("VALIDATE STACK: #{inspect(stack_params)}")
-
     changeset =
       socket.assigns.stack
       |> Stacks.change_stack(stack_params)
@@ -105,6 +100,10 @@ defmodule PtahServerWeb.StackLive.FormComponent do
 
   @impl true
   def handle_event("change_stack", %{"stack" => stack_params}, socket) do
+    # TODO: saving only swarm_id here. Need to create nested form to drop everything when swarm changed?
+    stack_params =
+      Map.merge(stack_params, %{"swarm_id" => socket.assigns.form.params["swarm_id"]})
+
     socket =
       if stack_params["stack_name"] do
         assign(socket, :stack_schema, Marketplace.get_stack(stack_params["stack_name"]))
@@ -147,11 +146,13 @@ defmodule PtahServerWeb.StackLive.FormComponent do
 
   defp save_stack(socket, :new, stack_params) do
     stack_params = assign_stack_params(stack_params, socket)
-
-    Logger.debug("SAVE STACK PARAMS: #{inspect(stack_params)}")
+    Logger.debug("save stack_params: #{inspect(stack_params)}")
 
     case Stacks.create_stack(stack_params) do
       {:ok, stack} ->
+        # TODO: rollback insert on stack_create failure
+        :ok = Presence.stack_create(stack)
+
         notify_parent({:saved, stack})
 
         {:noreply,
@@ -165,29 +166,30 @@ defmodule PtahServerWeb.StackLive.FormComponent do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    Logger.info("ASSIGN FORM: #{inspect(changeset)}")
-
     assign(socket, :form, to_form(changeset))
   end
 
   defp assign_stack_params(stack_params, socket) do
     stack_schema = socket.assigns.stack_schema
 
-    Logger.debug(
-      "STACK SCHEMA: #{inspect(update_in(stack_params, ["services", "0", "name"], fn s -> "SOMENAME" end))}}"
-    )
-
     if stack_schema do
       Map.merge(stack_params, %{
-        "name" => stack_schema["name"],
         "stack_name" => stack_schema["name"],
         "stack_version" => stack_schema["version"],
         "services" =>
           Enum.with_index(stack_schema["services"], fn s, index ->
             Map.update(
-              Map.put(stack_params["services"][Integer.to_string(index)], "name", s["name"]),
+              Map.merge(
+                stack_params["services"][Integer.to_string(index)],
+                %{
+                  "name" => "#{stack_params["name"]}_#{s["name"]}",
+                  "service_name" => s["name"]
+                }
+              ),
               "published_ports",
               %{},
+              # TODO: move this into Service.changeset to the prepare_changes form.
+              #       or just remove it, and filter the list of ports in the channel when sending the cmd.
               fn ports -> Map.reject(ports, fn {_key, p} -> p["published_port"] == nil end) end
             )
           end)

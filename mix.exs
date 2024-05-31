@@ -58,7 +58,8 @@ defmodule PtahServer.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.2"}
+      {:bandit, "~> 1.2"},
+      {:ptah_proto, git: "https://gitlab.com/ptah-sh/ptah_proto.git"}
     ]
   end
 

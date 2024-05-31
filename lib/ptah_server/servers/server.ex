@@ -7,8 +7,10 @@ defmodule PtahServer.Servers.Server do
     field :name, :string
     field :agent_token, :string
     field :last_seen_at, :naive_datetime
+    field :role, Ecto.Enum, values: [:manager, :worker]
 
     belongs_to :team, PtahServer.Teams.Team
+    belongs_to :swarm, PtahServer.Swarms.Swarm
 
     timestamps(type: :utc_datetime)
   end

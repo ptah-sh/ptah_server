@@ -5,12 +5,12 @@ defmodule PtahServerAgent.AgentChannel do
   require Logger
   use PtahServerAgent, :channel
   alias PtahServer.Servers.Server
+  use PtahProto, :phx_channel
+  alias PtahProto.Event
 
   @impl true
   def join("agent:daemon", payload, socket) do
     # TODO: check if the agent has already joined. Allow join only once - one agent per one server.
-
-    Logger.info("daemon join: #{inspect(payload)}")
 
     {token, payload} = Map.pop(payload, "token")
 
@@ -43,20 +43,36 @@ defmodule PtahServerAgent.AgentChannel do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_in("swarm:created", payload, socket) do
-    swarm = Repo.get_by(Swarm, id: payload["meta"]["swarm_id"])
+  @impl PtahProto
+  def handle_packet(%Event.ServiceCreated{} = payload, socket) do
+    service = Repo.get_by(Server.Service, id: payload.service_id)
+
+    {:ok, _} =
+      service
+      |> Ecto.Changeset.change(ext_id: payload.docker.service_id)
+      |> Repo.update()
+
+    {:noreply, socket}
+  end
+
+  @impl PtahProto
+  def handle_packet(%Event.SwarmCreated{} = packet, socket) do
+    swarm = Repo.get_by(Swarm, id: packet.swarm_id)
 
     {:ok, _} =
       swarm
-      |> Ecto.Changeset.change(ext_id: payload["data"]["swarm_id"])
+      |> Ecto.Changeset.change(ext_id: packet.docker.swarm_id)
       |> Repo.update()
 
-    Presence.update_server(socket.assigns.server, %{
-      swarm: %{}
-    })
+    {:ok, server} =
+      socket.assigns.server
+      # TODO: apply correct role here
+      |> Ecto.Changeset.change(swarm_id: swarm.id, role: :manager)
+      |> Repo.update()
 
-    {:noreply, socket}
+    Presence.swarm_created(server, %{})
+
+    {:noreply, assign(socket, :server, server)}
   end
 
   @impl true

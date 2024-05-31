@@ -1,6 +1,6 @@
 defmodule PtahServerWeb.ServerLive.Show do
   require Logger
-  alias PtahServerWeb.Presence
+  alias PtahServer.Repo
   use PtahServerWeb, :live_view
 
   alias PtahServer.Servers
@@ -28,7 +28,7 @@ defmodule PtahServerWeb.ServerLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:server, Servers.get_server!(id))}
+     |> assign(:server, Repo.preload(Servers.get_server!(id), :swarm))}
   end
 
   @impl true
@@ -37,17 +37,17 @@ defmodule PtahServerWeb.ServerLive.Show do
   end
 
   @impl true
-  def handle_info({PtahServerWeb.Presence, {:leave, metas}}, socket) do
-    Logger.info("Leaving #{inspect(metas)}")
-
+  def handle_info({PtahServerWeb.Presence, {:leave, _metas}}, socket) do
     {:noreply, assign(socket, :agent, nil)}
   end
 
   @impl true
-  def handle_event("create_swarm", _unsigned_params, socket) do
-    Logger.debug("handle_event: #{inspect(socket.assigns.server)}")
+  def handle_info({PtahServerWeb.Presence, {:swarm_created, server: server}}, socket) do
+    {:noreply, assign(socket, :server, Repo.preload(server, :swarm))}
+  end
 
-    # PtahServerWeb.Presence.cmd(socket.assigns.server, "swarm:create", %{})
+  @impl true
+  def handle_event("create_swarm", _unsigned_params, socket) do
     PtahServerWeb.Presence.swarm_create(socket.assigns.server)
 
     {:noreply, socket}

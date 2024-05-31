@@ -10,6 +10,9 @@ defmodule PtahServerWeb.Presence do
     otp_app: :ptah_server,
     pubsub_server: PtahServer.PubSub
 
+  alias PtahServerAgent.AgentChannel
+  alias PtahProto.Cmd
+  alias PtahServer.Marketplace
   alias PtahServer.Repo
   alias PtahServer.Servers.Server
 
@@ -46,8 +49,6 @@ defmodule PtahServerWeb.Presence do
         server_live_topic(server_id),
         {__MODULE__, {:join, metas}}
       )
-
-      Logger.debug("METASMETASMETAS, #{inspect(metas)}")
     end
 
     {:ok, state}
@@ -56,13 +57,26 @@ defmodule PtahServerWeb.Presence do
   def track_server(server, agent) do
     Server.update_last_seen(server)
 
-    track(self(), team_topic(server.team_id), server.id, agent)
+    track(
+      self(),
+      team_topic(server.team_id),
+      server.id,
+      Map.merge(agent, %{
+        :server => server
+      })
+    )
   end
 
-  def update_server(server, agent) do
+  def swarm_created(server, swarm) do
     current = get_agent(server.id)
 
-    update(self(), team_topic(server.team_id), server.id, Map.merge(current, agent))
+    Phoenix.PubSub.broadcast(
+      PtahServer.PubSub,
+      server_live_topic(server.id),
+      {__MODULE__, {:swarm_created, server: server}}
+    )
+
+    update(self(), team_topic(server.team_id), server.id, Map.merge(current, %{swarm: swarm}))
   end
 
   def untrack_server(server) do
@@ -71,8 +85,9 @@ defmodule PtahServerWeb.Presence do
     untrack(self(), team_topic(server.team_id), server.id)
   end
 
-  def list_online_servers(team_id) do
+  def list_online_agents(team_id) do
     list(team_topic(team_id))
+    |> Enum.map(fn {_, %{metas: [meta]}} -> meta end)
   end
 
   def get_agent(server_id) do
@@ -109,10 +124,70 @@ defmodule PtahServerWeb.Presence do
 
     %{metas: [%{socket: socket}]} = get_by_key(team_topic(server.team_id), server.id)
 
-    Phoenix.Channel.push(socket, "swarm:create", %{
-      meta: %{
-        swarm_id: swarm.id
-      }
+    AgentChannel.push(socket, %Cmd.CreateSwarm{
+      swarm_id: swarm.id
+    })
+  end
+
+  def stack_create(stack) do
+    manager =
+      list_online_agents(stack.team_id)
+      |> Enum.find(fn agent ->
+        agent.server.swarm_id == stack.swarm_id and agent.server.role == :manager
+      end)
+
+    # dbg()
+
+    if manager == nil do
+      raise "Manager not found"
+    end
+
+    stack_spec = Marketplace.get_stack(stack.stack_name)
+
+    AgentChannel.push(manager.socket, %Cmd.CreateStack{
+      name: stack.name,
+      services:
+        Enum.map(stack.services, fn service ->
+          spec = Marketplace.Stack.get_service(stack_spec, service.service_name)
+
+          %Cmd.CreateStack.Service{
+            service_id: service.id,
+            service_spec: %Cmd.CreateStack.Service.ServiceSpec{
+              name: "#{stack.name}_#{service.service_name}",
+              task_template: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate{
+                container_spec: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec{
+                  name: service.name,
+                  image: spec["image"],
+                  hostname: "#{service.service_name}.#{stack.name}"
+                },
+                networks: [
+                  %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.Network{
+                    target: "ptah-net",
+                    aliases: [
+                      "#{service.service_name}.#{stack.name}"
+                    ]
+                  }
+                ]
+              },
+              mode: %Cmd.CreateStack.Service.ServiceSpec.Mode{
+                replicated: %Cmd.CreateStack.Service.ServiceSpec.Mode.Replicated{
+                  replicas: 1
+                }
+              },
+              endpoint_spec: %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec{
+                ports:
+                  Enum.map(service.published_ports, fn port ->
+                    %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec.Port{
+                      protocol: "tcp",
+                      target_port: Marketplace.Stack.Service.get_port(spec, port.name)["target"],
+                      published_port: port.published_port,
+                      published_mode: "ingress"
+                    }
+                  end)
+              }
+            }
+          }
+        end)
     })
   end
 

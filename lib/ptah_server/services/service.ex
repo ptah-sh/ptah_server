@@ -2,9 +2,11 @@ defmodule PtahServer.Services.Service do
   require Logger
   use Ecto.Schema
   import Ecto.Changeset
+  import PtahServer.Changeset
 
   schema "services" do
     field :name, :string
+    field :service_name, :string
     field :ext_id, :string, default: ""
 
     belongs_to :team, PtahServer.Teams.Team
@@ -21,30 +23,17 @@ defmodule PtahServer.Services.Service do
   @doc false
   def changeset(service, attrs) do
     service
-    |> cast(attrs, [:name, :ext_id])
+    |> cast(attrs, [:name, :service_name, :ext_id])
     |> cast_embed(:published_ports, with: &published_port_changeset/2)
-    |> validate_required([:name])
-    |> prepare_changes(&maybe_put_team_id/1)
+    |> validate_required([:name, :service_name])
+    |> maybe_put_team_id()
 
     # TODO: make prepare_changes(&remove_unpublished_ports/1) ???
   end
 
   def published_port_changeset(port, attrs) do
     port
-    |> cast(attrs, [:published_port])
-    |> validate_required([:published_port])
-  end
-
-  # TODO: Move to generic changeset module
-  defp maybe_put_team_id(changeset) do
-    Logger.debug(
-      "PUT TEAM ID: #{inspect({get_change(changeset, :team_id), changeset.repo.get_team_id()})}"
-    )
-
-    if get_change(changeset, :team_id) == nil do
-      put_change(changeset, :team_id, changeset.repo.get_team_id())
-    else
-      changeset
-    end
+    |> cast(attrs, [:name, :published_port])
+    |> validate_required([:name, :published_port])
   end
 end

@@ -1,4 +1,16 @@
 defmodule PtahServer.Marketplace do
+  defmodule Stack do
+    defmodule Service do
+      def get_port(service, port) do
+        Enum.find(service["ports"], &(&1["name"] == port))
+      end
+    end
+
+    def get_service(stack, service) do
+      Enum.find(stack["services"], &(&1["name"] == service))
+    end
+  end
+
   def list_stacks() do
     stacks_dir = Application.app_dir(:ptah_server, "priv/stacks/**.stack.json")
 
