@@ -21,6 +21,10 @@ defmodule PtahServer.Servers do
     Repo.all(from s in Server, order_by: [asc: s.name])
   end
 
+  def list_by_swarm_id(swarm_id) do
+    Repo.all(from s in Server, where: s.swarm_id == ^swarm_id, order_by: [asc: s.name])
+  end
+
   @doc """
   Gets a single server.
 

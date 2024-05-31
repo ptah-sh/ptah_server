@@ -9,7 +9,7 @@ defmodule PtahServerWeb.ServerLive.Show do
   def mount(%{"id" => id}, _session, socket) do
     {server_id, _} = Integer.parse(id)
 
-    socket = assign(socket, :agent, PtahServerWeb.Presence.get_agent(server_id))
+    socket = assign(socket, :agent, PtahServerWeb.Presence.get_state(server_id))
 
     socket =
       if connected?(socket) do

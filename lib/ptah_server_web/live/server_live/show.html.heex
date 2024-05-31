@@ -25,7 +25,7 @@
   <:item title="Agent token"><%= @server.agent_token %></:item>
   <:item title="Agent version">
     <%= if (@agent) do %>
-      <%= @agent.agent.version %>
+      <%= @agent.join.agent.version %>
     <% else %>
       Agent is Offline
       <div>
@@ -40,13 +40,13 @@
 
 <%= if (@agent) do %>
   <.list>
-    <:item title="Docker Platform"><%= @agent.docker.platform %></:item>
-    <:item title="Docker Version"><%= @agent.docker.version %></:item>
+    <:item title="Docker Platform"><%= @agent.join.docker.platform %></:item>
+    <:item title="Docker Version"><%= @agent.join.docker.version %></:item>
   </.list>
 
   <.list>
     <:item title="Swarm">
-      <%= if (@agent.swarm) do %>
+      <%= if (@agent.join.swarm) do %>
         describe existing swarm
       <% else %>
         <.button phx-click="create_swarm">Create new Swarm</.button>

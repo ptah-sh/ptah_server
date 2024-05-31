@@ -1,5 +1,12 @@
 # TODO: move this presence to ptah_server_agent
 defmodule PtahServerWeb.Presence do
+  defmodule State do
+    alias PtahProto.Cmd
+    defstruct server: %{}, join: %{}, socket: %{}
+
+    @type t :: map()
+  end
+
   @moduledoc """
   Provides presence tracking to channels and processes.
 
@@ -15,6 +22,8 @@ defmodule PtahServerWeb.Presence do
   alias PtahServer.Marketplace
   alias PtahServer.Repo
   alias PtahServer.Servers.Server
+
+  alias PtahServerWeb.Presence.State
 
   require Logger
 
@@ -54,21 +63,23 @@ defmodule PtahServerWeb.Presence do
     {:ok, state}
   end
 
-  def track_server(server, agent) do
+  def track_server(server, state) do
     Server.update_last_seen(server)
 
     track(
       self(),
       team_topic(server.team_id),
       server.id,
-      Map.merge(agent, %{
-        :server => server
-      })
+      %State{
+        socket: state.socket,
+        join: state.join,
+        server: server
+      }
     )
   end
 
   def swarm_created(server, swarm) do
-    current = get_agent(server.id)
+    state = get_state(server.id)
 
     Phoenix.PubSub.broadcast(
       PtahServer.PubSub,
@@ -76,7 +87,11 @@ defmodule PtahServerWeb.Presence do
       {__MODULE__, {:swarm_created, server: server}}
     )
 
-    update(self(), team_topic(server.team_id), server.id, Map.merge(current, %{swarm: swarm}))
+    update(self(), team_topic(server.team_id), server.id, %State{
+      state
+      | server: server,
+        join: %Cmd.Join{state.join | swarm: swarm}
+    })
   end
 
   def untrack_server(server) do
@@ -90,7 +105,7 @@ defmodule PtahServerWeb.Presence do
     |> Enum.map(fn {_, %{metas: [meta]}} -> meta end)
   end
 
-  def get_agent(server_id) do
+  def get_state(server_id) do
     # Not sure if this implicit dependency is any good
     team_id = PtahServer.Repo.get_team_id()
 
@@ -122,9 +137,9 @@ defmodule PtahServerWeb.Presence do
         ext_id: ""
       })
 
-    %{metas: [%{socket: socket}]} = get_by_key(team_topic(server.team_id), server.id)
+    state = get_state(server.id)
 
-    AgentChannel.push(socket, %Cmd.CreateSwarm{
+    AgentChannel.push(state.socket, %Cmd.CreateSwarm{
       swarm_id: swarm.id
     })
   end
@@ -135,8 +150,6 @@ defmodule PtahServerWeb.Presence do
       |> Enum.find(fn agent ->
         agent.server.swarm_id == stack.swarm_id and agent.server.role == :manager
       end)
-
-    # dbg()
 
     if manager == nil do
       raise "Manager not found"

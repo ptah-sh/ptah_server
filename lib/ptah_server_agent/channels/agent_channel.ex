@@ -1,21 +1,20 @@
 defmodule PtahServerAgent.AgentChannel do
+  alias PtahServer.Services.Service
   alias PtahServer.Swarms.Swarm
   alias PtahServer.Repo
   alias PtahServerWeb.Presence
   require Logger
   use PtahServerAgent, :channel
   alias PtahServer.Servers.Server
-  use PtahProto, :phx_channel
+  use PtahProto, phx_topic: "agent:daemon"
   alias PtahProto.Event
+  alias PtahProto.Cmd
 
-  @impl true
-  def join("agent:daemon", payload, socket) do
+  def join(%Cmd.Join{} = payload, socket) do
     # TODO: check if the agent has already joined. Allow join only once - one agent per one server.
 
-    {token, payload} = Map.pop(payload, "token")
-
-    if token do
-      server = Server.get_by_token(token)
+    if payload.token do
+      server = Server.get_by_token(payload.token)
 
       Repo.put_team_id(server.team_id)
 
@@ -45,7 +44,7 @@ defmodule PtahServerAgent.AgentChannel do
 
   @impl PtahProto
   def handle_packet(%Event.ServiceCreated{} = payload, socket) do
-    service = Repo.get_by(Server.Service, id: payload.service_id)
+    service = Repo.get_by(Service, id: payload.service_id)
 
     {:ok, _} =
       service
@@ -67,7 +66,7 @@ defmodule PtahServerAgent.AgentChannel do
     {:ok, server} =
       socket.assigns.server
       # TODO: apply correct role here
-      |> Ecto.Changeset.change(swarm_id: swarm.id, role: :manager)
+      |> Ecto.Changeset.change(swarm_id: swarm.id, role: :manager, ext_id: packet.docker.node_id)
       |> Repo.update()
 
     Presence.swarm_created(server, %{})
@@ -76,18 +75,11 @@ defmodule PtahServerAgent.AgentChannel do
   end
 
   @impl true
-  def handle_info({:after_join, payload}, socket) do
+  def handle_info({:after_join, %Cmd.Join{} = payload}, socket) do
     {:ok, _} =
       Presence.track_server(socket.assigns.server, %{
         socket: socket,
-        docker: %{
-          platform: payload["docker"]["platform"],
-          version: payload["docker"]["version"]
-        },
-        agent: %{
-          version: payload["agent"]["version"]
-        },
-        swarm: map_swarm(payload["swarm"])
+        join: payload
       })
 
     {:noreply, socket}
@@ -98,13 +90,5 @@ defmodule PtahServerAgent.AgentChannel do
     Presence.untrack_server(socket.assigns.server)
 
     {:noreply, socket}
-  end
-
-  defp map_swarm(swarm) do
-    if swarm do
-      %{}
-    else
-      nil
-    end
   end
 end

@@ -1,5 +1,6 @@
 defmodule PtahServerWeb.StackLive.FormComponent do
   require Logger
+  alias PtahServer.Stacks.Stack
   alias PtahServerWeb.Presence
   alias PtahServerWeb.StackLive.Components.ServiceComponent
   alias PtahServer.Marketplace
@@ -40,7 +41,14 @@ defmodule PtahServerWeb.StackLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input type="select" field={@form[:swarm_id]} label="Swarm" options={@swarms} />
+        <.input
+          type="select"
+          field={@form[:swarm_id]}
+          label="Swarm"
+          options={@swarms}
+          phx-target={@myself}
+          phx-change="change_swarm"
+        />
 
         <.input
           type="select"
@@ -59,13 +67,14 @@ defmodule PtahServerWeb.StackLive.FormComponent do
           </h2>
 
           <p class="text-sm"><%= @stack_schema["description"] %></p>
-
+          <%!-- <%= inspect(@form[:swarm_id]) %> --%>
           <.inputs_for :let={service} field={@form[:services]}>
             <.live_component
               module={ServiceComponent}
               id={service.id}
               field={service}
               stack_schema={Enum.at(@stack_schema["services"], service.index)}
+              swarm_id={@form[:swarm_id].value}
             />
           </.inputs_for>
         <% end %>
@@ -80,7 +89,11 @@ defmodule PtahServerWeb.StackLive.FormComponent do
 
   @impl true
   def update(%{stack: stack} = assigns, socket) do
-    changeset = Stacks.change_stack(stack)
+    changeset =
+      Stacks.change_stack(%Stack{
+        stack
+        | swarm_id: stack.swarm_id || List.first(socket.assigns.swarms) |> elem(1)
+      })
 
     {:ok,
      socket
@@ -99,10 +112,35 @@ defmodule PtahServerWeb.StackLive.FormComponent do
   end
 
   @impl true
+  def handle_event("change_swarm", %{"stack" => stack_params}, socket) do
+    params =
+      socket.assigns.form.params
+      |> Map.merge(stack_params)
+      |> Map.update!("services", fn services ->
+        Enum.map(services, &Map.delete(&1, "server_id"))
+      end)
+
+    Logger.emergency("params: #{inspect(params)}")
+
+    changeset =
+      socket.assigns.stack
+      |> Stacks.change_stack(params)
+      |> Map.put(:action, :validate)
+
+    socket =
+      socket
+      |> assign_form(changeset)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("change_stack", %{"stack" => stack_params}, socket) do
     # TODO: saving only swarm_id here. Need to create nested form to drop everything when swarm changed?
     stack_params =
-      Map.merge(stack_params, %{"swarm_id" => socket.assigns.form.params["swarm_id"]})
+      Map.merge(stack_params, %{"swarm_id" => socket.assigns.form[:swarm_id].value})
+
+    Logger.warning("stack_params: #{inspect(stack_params)}")
 
     socket =
       if stack_params["stack_name"] do
