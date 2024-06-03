@@ -67,7 +67,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
           </h2>
 
           <p class="text-sm"><%= @stack_schema["description"] %></p>
-          <%!-- <%= inspect(@form[:swarm_id]) %> --%>
           <.inputs_for :let={service} field={@form[:services]}>
             <.live_component
               module={ServiceComponent}
@@ -162,8 +161,23 @@ defmodule PtahServerWeb.StackLive.FormComponent do
       if socket.assigns.stack_schema do
         Map.merge(stack_params, %{
           "services" =>
-            Enum.map(stack_schema["services"], fn s ->
-              %{"published_ports" => List.duplicate(%{}, length(s["ports"]))}
+            Enum.map(stack_schema["services"], fn service_spec ->
+              %{
+                "spec" => %{
+                  "task_template" => %{
+                    "container_spec" => %{
+                      "mounts" => Enum.map(service_spec["mounts"], &%{"name" => &1["name"]})
+                    }
+                  },
+                  "endpoint_spec" => %{
+                    "ports" =>
+                      Enum.map(
+                        service_spec["ports"],
+                        &%{"name" => &1["name"], "published_port" => nil}
+                      )
+                  }
+                }
+              }
             end)
         })
       else
@@ -215,26 +229,35 @@ defmodule PtahServerWeb.StackLive.FormComponent do
         "stack_name" => stack_schema["name"],
         "stack_version" => stack_schema["version"],
         "services" =>
-          Enum.with_index(stack_schema["services"], fn s, index ->
-            Map.update(
-              Map.merge(
-                stack_params["services"][Integer.to_string(index)],
-                %{
-                  "name" => "#{stack_params["name"]}_#{s["name"]}",
-                  "service_name" => s["name"]
-                }
-              ),
-              "published_ports",
-              %{},
-              # TODO: move this into Service.changeset to the prepare_changes form.
-              #       or just remove it, and filter the list of ports in the channel when sending the cmd.
-              fn ports -> Map.reject(ports, fn {_key, p} -> p["published_port"] == nil end) end
+          Enum.with_index(stack_schema["services"], fn service_spec, index ->
+            map_service_params(
+              stack_params,
+              stack_params["services"][Integer.to_string(index)],
+              service_spec
             )
           end)
       })
     else
       stack_params
     end
+  end
+
+  defp map_service_params(stack_params, service_params, service_spec) do
+    Map.merge(
+      service_params,
+      %{
+        "name" => "#{stack_params["name"]}_#{service_spec["name"]}",
+        "service_name" => service_spec["name"],
+        "spec" =>
+          Map.put(
+            service_params["spec"],
+            "task_template",
+            Map.put(service_params["spec"]["task_template"] || %{}, "container_spec", %{
+              "mounts" => Enum.map(service_spec["mounts"], &%{"name" => &1["name"]})
+            })
+          )
+      }
+    )
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})

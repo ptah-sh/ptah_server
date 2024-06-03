@@ -171,7 +171,25 @@ defmodule PtahServerWeb.Presence do
                 container_spec: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec{
                   name: service.name,
                   image: spec["image"],
-                  hostname: "#{service.service_name}.#{stack.name}"
+                  hostname: "#{service.service_name}.#{stack.name}",
+                  mounts:
+                    Enum.map(spec["mounts"], fn mount ->
+                      %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Mount{
+                        type: "bind",
+                        source:
+                          Path.join([
+                            manager.server.mounts_root,
+                            stack.name,
+                            service.service_name,
+                            mount["name"]
+                          ]),
+                        target: mount["target"],
+                        bind_options:
+                          %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Mount.BindOptions{
+                            create_mountpoint: true
+                          }
+                      }
+                    end)
                 },
                 networks: [
                   %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.Network{
@@ -180,7 +198,10 @@ defmodule PtahServerWeb.Presence do
                       "#{service.service_name}.#{stack.name}"
                     ]
                   }
-                ]
+                ],
+                placement: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.Placement{
+                  constraints: []
+                }
               },
               mode: %Cmd.CreateStack.Service.ServiceSpec.Mode{
                 replicated: %Cmd.CreateStack.Service.ServiceSpec.Mode.Replicated{
@@ -189,7 +210,7 @@ defmodule PtahServerWeb.Presence do
               },
               endpoint_spec: %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec{
                 ports:
-                  Enum.map(service.published_ports, fn port ->
+                  Enum.map(service.spec.endpoint_spec.ports, fn port ->
                     %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec.Port{
                       protocol: "tcp",
                       target_port: Marketplace.Stack.Service.get_port(spec, port.name)["target"],

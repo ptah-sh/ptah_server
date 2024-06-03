@@ -1,4 +1,5 @@
 defmodule PtahServerAgent.AgentChannel do
+  alias PtahServer.Servers
   alias PtahServer.Services.Service
   alias PtahServer.Swarms.Swarm
   alias PtahServer.Repo
@@ -17,6 +18,8 @@ defmodule PtahServerAgent.AgentChannel do
       server = Server.get_by_token(payload.token)
 
       Repo.put_team_id(server.team_id)
+
+      {:ok, server} = Servers.update_server(server, %{mounts_root: payload.mounts_root})
 
       send(self(), {:after_join, payload})
 

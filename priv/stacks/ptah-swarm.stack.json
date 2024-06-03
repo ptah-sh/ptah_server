@@ -24,7 +24,7 @@
           "description": "Caddy HTTPS port"
         }
       ],
-      "volumes": [
+      "mounts": [
         {
           "name": "data",
           "target": "/data",

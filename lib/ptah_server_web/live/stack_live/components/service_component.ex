@@ -8,7 +8,6 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
   def mount(socket) do
     socket =
       socket
-      |> assign(:bind_volumes, false)
       |> assign(:servers, [])
 
     {:ok, socket}
@@ -29,44 +28,41 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
         </p>
       </h3>
 
-      <div>Ports</div>
-      <table>
-        <tbody>
-          <.inputs_for :let={port} field={@field[:published_ports]}>
-            <.live_component
-              module={PortComponent}
-              id={port.id}
-              field={port}
-              stack_schema={Enum.at(@stack_schema["ports"], port.index)}
+      <.inputs_for :let={spec_field} field={@field[:spec]}>
+        <.inputs_for :let={endpoint_spec} field={spec_field[:endpoint_spec]}>
+          <div>Ports</div>
+          <table>
+            <tbody>
+              <.inputs_for :let={port_spec} field={endpoint_spec[:ports]}>
+                <.live_component
+                  module={PortComponent}
+                  id={port_spec.id}
+                  field={port_spec}
+                  stack_schema={Enum.at(@stack_schema["ports"], port_spec.index)}
+                />
+              </.inputs_for>
+            </tbody>
+          </table>
+        </.inputs_for>
+        <div>Volumes</div>
+        <%= for volume <- @stack_schema["mounts"] do %>
+          <p>
+            <%= volume["name"] %>: <%= volume["description"] %> (container <%= volume["target"] %>)
+          </p>
+        <% end %>
+        <div :if={@stack_schema["mounts"]}>
+          <.input type="checkbox" field={spec_field[:bind_volumes]} label="Bind Volumes?" />
+
+          <div :if={spec_field[:bind_volumes].value}>
+            <.input
+              type="select"
+              field={spec_field[:placement_server_id]}
+              options={@servers}
+              prompt="Select a Server"
             />
-          </.inputs_for>
-        </tbody>
-      </table>
-
-      <div>Volumes</div>
-      <%= for volume <- @stack_schema["volumes"] do %>
-        <p><%= volume["name"] %>: <%= volume["description"] %> (container <%= volume["target"] %>)</p>
-      <% end %>
-      <div :if={@stack_schema["volumes"]}>
-        <.input
-          type="checkbox"
-          name=""
-          checked={@bind_volumes}
-          label="Bind Volumes?"
-          phx-target={@myself}
-          phx-change="change_bind_volumes"
-        />
-
-        <div :if={@bind_volumes}>
-          <%= inspect(@field[:server_id].value) %>
-          <.input
-            type="select"
-            field={@field[:server_id]}
-            options={@servers}
-            prompt="Select a Server"
-          />
+          </div>
         </div>
-      </div>
+      </.inputs_for>
     </div>
     """
   end
@@ -83,11 +79,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
 
   @impl true
   def handle_event("change_bind_volumes", _params, socket) do
-    bind_volumes = !socket.assigns.bind_volumes
-
     socket =
       socket
-      |> assign(:bind_volumes, bind_volumes)
       |> assign_servers()
 
     {:noreply, socket}
@@ -95,7 +88,7 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
 
   defp assign_servers(socket) do
     servers =
-      if socket.assigns.bind_volumes do
+      if socket.assigns.field.params["spec"]["bind_volumes"] do
         Enum.map(Servers.list_by_swarm_id(socket.assigns.swarm_id), &{&1.name, &1.id})
       else
         []
