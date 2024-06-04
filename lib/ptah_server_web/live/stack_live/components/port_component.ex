@@ -3,11 +3,6 @@ defmodule PtahServerWeb.StackLive.Components.PortComponent do
   use PtahServerWeb, :live_component
 
   @impl true
-  def mount(socket) do
-    {:ok, assign(socket, :expose, false)}
-  end
-
-  @impl true
   def render(assigns) do
     ~H"""
     <tr>
@@ -20,40 +15,42 @@ defmodule PtahServerWeb.StackLive.Components.PortComponent do
         </span>
       </td>
       <td>
-        <.input
-          type="checkbox"
-          name=""
-          checked={@expose}
-          label="Expose to public?"
-          phx-target={@myself}
-          phx-change="change_expose"
+        <input
+          type="hidden"
+          id={@field[:name].id}
+          name={@field[:name].name}
+          value={@stack_schema["name"]}
         />
-      </td>
-      <td>
-        <%= if @expose do %>
-          <input
-            type="hidden"
-            id={@field[:name].id}
-            name={@field[:name].name}
-            value={@stack_schema["name"]}
-          />
 
-          <.input
-            type="number"
-            field={@field[:published_port]}
-            placeholder="Enter Public Port"
-            label=""
-          />
-        <% end %>
+        <div>
+          <.inputs_for :let={endpoint_spec} field={@field[:docker]}>
+            <.input type="checkbox" field={endpoint_spec[:exposed]} label="Expose via Swarm Nodes?" />
+
+            <%= if endpoint_spec[:exposed].value do %>
+              <.input
+                type="number"
+                field={endpoint_spec[:published_port]}
+                placeholder="Enter Ingress Port"
+                label=""
+              />
+              <small>Should be unique across Swarm Cluster</small>
+            <% end %>
+          </.inputs_for>
+        </div>
+
+        <div>
+          <.inputs_for :let={caddy_spec} field={@field[:caddy]}>
+            <.input field={caddy_spec[:enabled]} type="checkbox" label="Expose to Internet?" />
+
+            <%= if caddy_spec[:enabled].value do %>
+              <.input field={caddy_spec[:domain]} type="text" label="Domain" />
+              <.input field={caddy_spec[:port]} type="text" label="Port" />
+              <.input field={caddy_spec[:path]} type="text" label="Path" />
+            <% end %>
+          </.inputs_for>
+        </div>
       </td>
     </tr>
     """
-  end
-
-  @impl true
-  def handle_event("change_expose", _params, socket) do
-    socket = assign(socket, expose: !socket.assigns.expose)
-
-    {:noreply, socket}
   end
 end

@@ -28,6 +28,22 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
         </p>
       </h3>
 
+      <div>Environment Variables</div>
+      <table>
+        <tbody>
+          <%= for %{"name" => name, "value" => value} <- @stack_schema["env"] do %>
+            <tr>
+              <td>
+                <%= name %>
+              </td>
+              <td>
+                <%= value %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
       <.inputs_for :let={spec_field} field={@field[:spec]}>
         <.inputs_for :let={endpoint_spec} field={spec_field[:endpoint_spec]}>
           <div>Ports</div>
@@ -39,6 +55,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
                   id={port_spec.id}
                   field={port_spec}
                   stack_schema={Enum.at(@stack_schema["ports"], port_spec.index)}
+                  service_name={@stack_schema["name"]}
+                  service_hostname={"#{@stack_schema["name"]}.#{@stack_name}"}
                 />
               </.inputs_for>
             </tbody>
@@ -87,6 +105,7 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
   end
 
   defp assign_servers(socket) do
+    # FIXME: get_field(spec).bind_volumes ??
     servers =
       if socket.assigns.field.params["spec"]["bind_volumes"] do
         Enum.map(Servers.list_by_swarm_id(socket.assigns.swarm_id), &{&1.name, &1.id})

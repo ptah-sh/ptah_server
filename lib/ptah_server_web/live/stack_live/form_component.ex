@@ -74,6 +74,7 @@ defmodule PtahServerWeb.StackLive.FormComponent do
               field={service}
               stack_schema={Enum.at(@stack_schema["services"], service.index)}
               swarm_id={@form[:swarm_id].value}
+              stack_name={@form[:name].value}
             />
           </.inputs_for>
         <% end %>
@@ -118,8 +119,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
       |> Map.update!("services", fn services ->
         Enum.map(services, &Map.delete(&1, "server_id"))
       end)
-
-    Logger.emergency("params: #{inspect(params)}")
 
     changeset =
       socket.assigns.stack
@@ -198,7 +197,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
 
   defp save_stack(socket, :new, stack_params) do
     stack_params = assign_stack_params(stack_params, socket)
-    Logger.debug("save stack_params: #{inspect(stack_params)}")
 
     case Stacks.create_stack(stack_params) do
       {:ok, stack} ->

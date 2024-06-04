@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "nginx-web-demo",
+  "version": "0.1.0",
+  "description": "Demo used to show how Ptah can publish web services via Caddy.",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "services": [
+    {
+      "name": "nginx",
+      "description": "An empty Nginx server.",
+      "image": "nginxdemos/hello",
+      "env": [],
+      "ports": [
+        {
+          "name": "http",
+          "target": 80,
+          "description": "Nginx HTTP port"
+        }
+      ],
+      "mounts": []
+    }
+  ]
+}

@@ -12,16 +12,36 @@
       "name": "caddy",
       "description": "The reverse proxy that powers Ptah Swarm cluster.",
       "image": "caddy:2.8-alpine",
+      "env": [
+        {
+          "name": "CADDY_ADMIN",
+          "value": "0.0.0.0:2019"
+        }
+      ],
       "ports": [
+        {
+          "name": "admin",
+          "target": 2019,
+          "protocol": "tcp",
+          "description": "Caddy admin port, should be exposed to the cluster."
+        },
         {
           "name": "http",
           "target": 80,
+          "protocol": "tcp",
           "description": "Caddy HTTP port"
         },
         {
           "name": "https",
           "target": 443,
+          "protocol": "tcp",
           "description": "Caddy HTTPS port"
+        },
+        {
+          "name": "http3",
+          "target": 443,
+          "protocol": "udp",
+          "description": "Caddy HTTP/3 port"
         }
       ],
       "mounts": [

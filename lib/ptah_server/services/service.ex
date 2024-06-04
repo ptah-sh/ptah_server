@@ -78,35 +78,59 @@ defmodule PtahServer.Services.Service do
           endpoint_spec
           |> cast(attrs, [])
           |> cast_embed(:ports)
-          |> prepare_changes(&remove_unpublished_ports/1)
         end
 
-        def remove_unpublished_ports(changeset) do
-          case get_field(changeset, :ports) do
-            nil ->
-              changeset
+        embeds_many :ports, Port do
+          field :name, :string
 
-            ports ->
-              put_change(changeset, :ports, Enum.filter(ports, & &1.published_port))
-          end
-        end
-
-        embeds_many :ports, PortSpec do
-          def changeset(port_spec, attrs) do
-            port_spec
-            |> cast(attrs, [:name, :published_port])
-            |> validate_required_if_provided()
+          def changeset(port, attrs) do
+            port
+            # TODO: remove name from casts and assign the port name in the form handler
+            |> cast(attrs, [:name])
+            |> validate_required([:name])
+            |> cast_embed(:docker)
+            |> cast_embed(:caddy)
           end
 
-          def validate_required_if_provided(changeset) do
-            case get_field(changeset, :published_port) do
-              nil -> changeset
-              _ -> validate_required(changeset, [:name, :published_port])
+          embeds_one :docker, Docker do
+            field :exposed, :boolean
+            field :published_port, :integer
+
+            def changeset(docker, attrs) do
+              docker
+              |> cast(attrs, [:exposed, :published_port])
+              |> validate_required([:exposed])
+              |> validate_required_if_exposed()
+            end
+
+            def validate_required_if_exposed(changeset) do
+              case get_field(changeset, :exposed) do
+                true -> validate_required(changeset, [:published_port])
+                _ -> changeset
+              end
             end
           end
 
-          field :name, :string
-          field :published_port, :integer
+          embeds_one :caddy, Caddy do
+            def changeset(caddy, attrs) do
+              caddy
+              |> cast(attrs, [:enabled, :domain, :port, :path])
+              |> validate_required([:enabled])
+              |> validate_required_if_enabled()
+            end
+
+            def validate_required_if_enabled(changeset) do
+              case get_field(changeset, :enabled) do
+                true -> validate_required(changeset, [:domain, :port, :path])
+                _ -> changeset
+              end
+            end
+
+            field :enabled, :boolean
+            field :domain, :string
+            field :port, :integer
+            field :path, :string
+          end
         end
       end
     end

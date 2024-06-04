@@ -17,6 +17,8 @@ defmodule PtahServerWeb.Presence do
     otp_app: :ptah_server,
     pubsub_server: PtahServer.PubSub
 
+  alias PtahServer.Swarms
+  alias PtahServer.Servers
   alias PtahServerAgent.AgentChannel
   alias PtahProto.Cmd
   alias PtahServer.Marketplace
@@ -172,6 +174,13 @@ defmodule PtahServerWeb.Presence do
                   name: service.name,
                   image: spec["image"],
                   hostname: "#{service.service_name}.#{stack.name}",
+                  env:
+                    Enum.map(spec["env"], fn env ->
+                      %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Env{
+                        name: env["name"],
+                        value: env["value"]
+                      }
+                    end),
                   mounts:
                     Enum.map(spec["mounts"], fn mount ->
                       %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Mount{
@@ -200,7 +209,16 @@ defmodule PtahServerWeb.Presence do
                   }
                 ],
                 placement: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.Placement{
-                  constraints: []
+                  constraints:
+                    if service.spec.placement_server_id do
+                      placement_server = Servers.get_server!(service.spec.placement_server_id)
+
+                      [
+                        "node.id == #{placement_server.ext_id}"
+                      ]
+                    else
+                      []
+                    end
                 }
               },
               mode: %Cmd.CreateStack.Service.ServiceSpec.Mode{
@@ -210,11 +228,13 @@ defmodule PtahServerWeb.Presence do
               },
               endpoint_spec: %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec{
                 ports:
-                  Enum.map(service.spec.endpoint_spec.ports, fn port ->
+                  service.spec.endpoint_spec.ports
+                  |> Enum.filter(& &1.docker.exposed)
+                  |> Enum.map(fn port ->
                     %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec.Port{
                       protocol: "tcp",
                       target_port: Marketplace.Stack.Service.get_port(spec, port.name)["target"],
-                      published_port: port.published_port,
+                      published_port: port.docker.published_port,
                       published_mode: "ingress"
                     }
                   end)
@@ -223,6 +243,17 @@ defmodule PtahServerWeb.Presence do
           }
         end)
     })
+
+    # TODO: remove this dependency. It is here just to record a demo. Fails when installing ptah-swarm itself,
+    #   as there's no Caddy yet.
+    #   This case should be handled elsewhere
+    if stack.name != "ptah-swarm" do
+      AgentChannel.push(manager.socket, %Cmd.LoadCaddyConfig{
+        config: Swarms.rebuild_caddy(Repo.preload(manager.server, :swarm).swarm)
+      })
+    end
+
+    :ok
   end
 
   defp team_topic(team_id) do
