@@ -12,6 +12,7 @@ defmodule PtahServer.Services.Service do
     belongs_to :team, PtahServer.Teams.Team
     belongs_to :stack, PtahServer.Stacks.Stack
 
+    # TODO: extract changesets to maintain better readability
     embeds_one :spec, ServiceSpec do
       def changeset(service_spec, attrs) do
         service_spec
@@ -146,7 +147,5 @@ defmodule PtahServer.Services.Service do
     # |> cast_embed(:published_ports, with: &published_port_changeset/2)
     |> validate_required([:name, :service_name])
     |> maybe_put_team_id()
-
-    # TODO: make prepare_changes(&remove_unpublished_ports/1) ???
   end
 end

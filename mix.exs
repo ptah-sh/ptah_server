@@ -59,7 +59,12 @@ defmodule PtahServer.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
-      {:ptah_proto, git: "https://gitlab.com/ptah-sh/ptah_proto.git"}
+      {:ptah_proto, git: "https://github.com/ptah-sh/ptah_proto.git"},
+
+      # tesla for http requests
+      {:tesla, "~> 1.4"},
+      # hackney for tesla
+      {:hackney, "~> 1.17"}
     ]
   end
 

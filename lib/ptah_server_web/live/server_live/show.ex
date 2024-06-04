@@ -1,6 +1,8 @@
 defmodule PtahServerWeb.ServerLive.Show do
   require Logger
+  alias PtahServerAgent.AgentChannel
   alias PtahServer.Repo
+  alias PtahProto.Cmd
   use PtahServerWeb, :live_view
 
   alias PtahServer.Servers
@@ -9,7 +11,11 @@ defmodule PtahServerWeb.ServerLive.Show do
   def mount(%{"id" => id}, _session, socket) do
     {server_id, _} = Integer.parse(id)
 
-    socket = assign(socket, :agent, PtahServerWeb.Presence.get_state(server_id))
+    socket =
+      assign(socket,
+        agent: PtahServerWeb.Presence.get_state(server_id),
+        latest_version: GenServer.call(PtahServerAgent.VersionMonitor, :get_latest_version)
+      )
 
     socket =
       if connected?(socket) do
@@ -49,6 +55,16 @@ defmodule PtahServerWeb.ServerLive.Show do
   @impl true
   def handle_event("create_swarm", _unsigned_params, socket) do
     PtahServerWeb.Presence.swarm_create(socket.assigns.server)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("upgrade_agent", _unsigned_params, socket) do
+    :ok =
+      AgentChannel.push(socket.assigns.agent.socket, %Cmd.SelfUpgrade{
+        version: socket.assigns.latest_version
+      })
 
     {:noreply, socket}
   end

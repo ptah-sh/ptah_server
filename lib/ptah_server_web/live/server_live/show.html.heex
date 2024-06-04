@@ -26,6 +26,18 @@
   <:item title="Agent version">
     <%= if (@agent) do %>
       <%= @agent.join.agent.version %>
+
+      <%= if (@latest_version && @agent.join.agent.version != @latest_version) do %>
+        <.button phx-click="upgrade_agent">
+          Upgrade to <%= @latest_version %>
+        </.button>
+        <a
+          href={"https://github.com/ptah-sh/ptah_agent/compare/#{@agent.join.agent.version}...#{@latest_version}"}
+          target="_blank"
+        >
+          <%= @agent.join.agent.version %>...<%= @latest_version %>
+        </a>
+      <% end %>
     <% else %>
       Agent is Offline
       <div>

@@ -40,7 +40,7 @@ defmodule PtahServerWeb.StackLive.Components.PortComponent do
 
         <div>
           <.inputs_for :let={caddy_spec} field={@field[:caddy]}>
-            <.input field={caddy_spec[:enabled]} type="checkbox" label="Expose to Internet?" />
+            <.input field={caddy_spec[:enabled]} type="checkbox" label="Expose to the Internet?" />
 
             <%= if caddy_spec[:enabled].value do %>
               <.input field={caddy_spec[:domain]} type="text" label="Domain" />

@@ -76,7 +76,7 @@ defmodule PtahServerWeb.ServerLive.Index do
     %{
       id: server.id,
       server: server,
-      agent: Enum.at(Presence.get_by_key("team:14", server.id), 0)
+      agent: Presence.get_state(server.id)
     }
   end
 end

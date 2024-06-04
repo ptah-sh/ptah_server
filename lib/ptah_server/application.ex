@@ -18,6 +18,7 @@ defmodule PtahServer.Application do
       # {PtahServer.Worker, arg},
       # Start to serve requests, typically the last entry
       PtahServerWeb.Endpoint,
+      PtahServerAgent.VersionMonitor,
       PtahServerWeb.Presence
     ]
 
