@@ -35,7 +35,7 @@ defmodule PtahServer.Services do
       ** (Ecto.NoResultsError)
 
   """
-  def get_service!(id), do: Repo.get!(Service, id)
+  def get_service!(id, opts \\ []), do: Repo.get!(Service, id, opts)
 
   @doc """
   Creates a service.

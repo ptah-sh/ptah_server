@@ -5,6 +5,7 @@ defmodule PtahServerWeb.UserAuth do
   import Phoenix.Controller
 
   require Logger
+  alias PtahServer.Teams.Team
   alias PtahServer.Teams.TeamUser
   alias PtahServer.Repo
   alias PtahServer.Accounts
@@ -121,6 +122,34 @@ defmodule PtahServerWeb.UserAuth do
       else
         {nil, conn}
       end
+    end
+  end
+
+  def fetch_current_api_team(conn, _opts) do
+    api_key =
+      with [api_key] <- get_req_header(conn, "x-ptah-api-key") do
+        api_key
+      else
+        _ -> ""
+      end
+
+    team =
+      PtahServer.Repo.get_by(
+        Team,
+        [api_key: api_key],
+        skip_team_id: true
+      )
+
+    case team do
+      nil ->
+        conn
+        |> send_resp(:unauthorized, "API Key is invalid")
+        |> halt()
+
+      team ->
+        PtahServer.Repo.put_team_id(team.id)
+
+        assign(conn, :current_api_team, team)
     end
   end
 

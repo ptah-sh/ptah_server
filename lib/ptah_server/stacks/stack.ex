@@ -13,7 +13,7 @@ defmodule PtahServer.Stacks.Stack do
     belongs_to :swarm, PtahServer.Swarms.Swarm
     belongs_to :team, PtahServer.Teams.Team
 
-    has_many :services, Service
+    has_many :services, Service, on_replace: :delete
 
     timestamps(type: :utc_datetime)
   end
@@ -22,7 +22,12 @@ defmodule PtahServer.Stacks.Stack do
   def changeset(stack, attrs) do
     stack
     |> cast(attrs, [:swarm_id, :name, :stack_name, :stack_version])
-    |> cast_assoc(:services, required: true, with: &Service.changeset/2)
+    |> cast_assoc(:services,
+      required: true,
+      with: &Service.changeset/2,
+      sort_param: :services_sort,
+      drop_param: :services_drop
+    )
     |> validate_required([:swarm_id, :name, :stack_name, :stack_version])
     |> validate_unique_in_team([:name])
   end

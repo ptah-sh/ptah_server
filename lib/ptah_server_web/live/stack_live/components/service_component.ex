@@ -1,7 +1,6 @@
 defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
   require Logger
   alias PtahServer.Servers
-  alias PtahServerWeb.StackLive.Components.PortComponent
   use PtahServerWeb, :live_component
 
   @impl true
@@ -18,67 +17,190 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
     ~H"""
     <div>
       <h3 class="text-lg border-t-2">
-        Service: <%= @stack_schema["name"] %>
-        <span class="text-sm italic">
-          (<%= @stack_schema["image"] %>)
-        </span>
+        Service: <.input field={@field[:name]} type="text" label="Name" />
+
+        <.input field={@field[:service_name]} type="hidden" />
+
+        <small>
+          Your service will be accessible on the Swarm cluster via the following endpoint:
+        </small>
+        <small><%= @field[:name].value %>.%stackname%</small>
 
         <p class="text-sm italic">
-          <%= @stack_schema["description"] %>
+          <%!-- <%= @stack_schema["description"] %> --%>
         </p>
       </h3>
 
-      <div>Environment Variables</div>
-      <table>
-        <tbody>
-          <%= for %{"name" => name, "value" => value} <- @stack_schema["env"] do %>
-            <tr>
-              <td>
-                <%= name %>
-              </td>
-              <td>
-                <%= value %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-
       <.inputs_for :let={spec_field} field={@field[:spec]}>
+        <.inputs_for :let={task_template} field={spec_field[:task_template]}>
+          <.inputs_for :let={container_spec} field={task_template[:container_spec]}>
+            <.input field={container_spec[:image]} type="text" label="Image" />
+
+            <div>
+              Environment Variables
+              <.button
+                type="button"
+                name={"#{container_spec[:env_sort].name}[]"}
+                phx-value="new"
+                phx-click={JS.dispatch("change")}
+              >
+                Add
+              </.button>
+            </div>
+
+            <table>
+              <tbody>
+                <.inputs_for :let={env_spec} field={container_spec[:env]}>
+                  <tr>
+                    <td>
+                      <.input field={env_spec[:name]} type="text" label="Name" />
+                    </td>
+                    <td>
+                      <.input field={env_spec[:value]} type="text" label="Value" />
+                    </td>
+                    <td>
+                      <.button
+                        type="button"
+                        name={"#{container_spec[:env_drop].name}[]"}
+                        value={env_spec.index}
+                        phx-click={JS.dispatch("change")}
+                      >
+                        Remove
+                      </.button>
+                    </td>
+                  </tr>
+                </.inputs_for>
+              </tbody>
+            </table>
+          </.inputs_for>
+        </.inputs_for>
+
         <.inputs_for :let={endpoint_spec} field={spec_field[:endpoint_spec]}>
-          <div>Ports</div>
+          <div>
+            Publish Ports via Swarm Nodes
+            <.button
+              type="button"
+              name={"#{endpoint_spec[:ports_sort].name}[]"}
+              phx-value="new"
+              phx-click={JS.dispatch("change")}
+            >
+              Add
+            </.button>
+          </div>
           <table>
             <tbody>
               <.inputs_for :let={port_spec} field={endpoint_spec[:ports]}>
-                <.live_component
-                  module={PortComponent}
-                  id={port_spec.id}
-                  field={port_spec}
-                  stack_schema={Enum.at(@stack_schema["ports"], port_spec.index)}
-                  service_name={@stack_schema["name"]}
-                  service_hostname={"#{@stack_schema["name"]}.#{@stack_name}"}
-                />
+                <tr>
+                  <td>
+                    <.input field={port_spec[:target_port]} type="text" label="Target Port" />
+                  </td>
+                  <td>
+                    <.input field={port_spec[:published_port]} type="text" label="Published Port" />
+                  </td>
+                  <td>
+                    <.button
+                      type="button"
+                      name={"#{endpoint_spec[:ports_drop].name}[]"}
+                      value={port_spec.index}
+                      phx-click={JS.dispatch("change")}
+                    >
+                      Remove
+                    </.button>
+                  </td>
+                </tr>
+              </.inputs_for>
+            </tbody>
+          </table>
+
+          <div>
+            Publish to the Internet via Caddy
+            <.button
+              type="button"
+              name={"#{endpoint_spec[:caddy_sort].name}[]"}
+              phx-value="new"
+              phx-click={JS.dispatch("change")}
+            >
+              Add
+            </.button>
+          </div>
+          <table>
+            <tbody>
+              <.inputs_for :let={handler_spec} field={endpoint_spec[:caddy]}>
+                <tr>
+                  <td>
+                    <.input field={handler_spec[:target_port]} type="text" label="Target Port" />
+                  </td>
+                  <td>
+                    <.input field={handler_spec[:published_port]} type="text" label="Published Port" />
+                  </td>
+                  <td><.input field={handler_spec[:domain]} type="text" label="Domain" /></td>
+                  <td><.input field={handler_spec[:path]} type="text" label="Path" /></td>
+                  <td>
+                    <.button
+                      type="button"
+                      name={"#{endpoint_spec[:caddy_drop].name}[]"}
+                      value={handler_spec.index}
+                      phx-click={JS.dispatch("change")}
+                    >
+                      Remove
+                    </.button>
+                  </td>
+                </tr>
               </.inputs_for>
             </tbody>
           </table>
         </.inputs_for>
-        <div>Volumes</div>
-        <%= for volume <- @stack_schema["mounts"] do %>
-          <p>
-            <%= volume["name"] %>: <%= volume["description"] %> (container <%= volume["target"] %>)
-          </p>
-        <% end %>
-        <div :if={@stack_schema["mounts"]}>
-          <.input type="checkbox" field={spec_field[:bind_volumes]} label="Bind Volumes?" />
 
-          <div :if={spec_field[:bind_volumes].value}>
-            <.input
-              type="select"
-              field={spec_field[:placement_server_id]}
-              options={@servers}
-              prompt="Select a Server"
-            />
+        <.input type="checkbox" field={spec_field[:bind_volumes]} label="Bind Volumes?" />
+
+        <div :if={spec_field[:bind_volumes].value}>
+          <.input
+            type="select"
+            field={spec_field[:placement_server_id]}
+            options={@servers}
+            prompt="Select a Server"
+          />
+
+          <div>
+            Volumes
           </div>
+          <.inputs_for :let={task_template} field={spec_field[:task_template]}>
+            <.inputs_for :let={container_spec} field={task_template[:container_spec]}>
+              <.button
+                type="button"
+                name={"#{container_spec[:mounts_sort].name}[]"}
+                phx-value="new"
+                phx-click={JS.dispatch("change")}
+              >
+                Add
+              </.button>
+
+              <table>
+                <tbody>
+                  <.inputs_for :let={volume_spec} field={container_spec[:mounts]}>
+                    <tr>
+                      <td>
+                        <.input field={volume_spec[:source]} type="text" label="Source" />
+                      </td>
+                      <td>
+                        <.input field={volume_spec[:target]} type="text" label="Target" />
+                      </td>
+                      <td>
+                        <.button
+                          type="button"
+                          name={"#{container_spec[:mounts_drop].name}[]"}
+                          value={volume_spec.index}
+                          phx-click={JS.dispatch("change")}
+                        >
+                          Remove
+                        </.button>
+                      </td>
+                    </tr>
+                  </.inputs_for>
+                </tbody>
+              </table>
+            </.inputs_for>
+          </.inputs_for>
         </div>
       </.inputs_for>
     </div>
@@ -93,15 +215,6 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
       |> assign_servers()
 
     {:ok, socket}
-  end
-
-  @impl true
-  def handle_event("change_bind_volumes", _params, socket) do
-    socket =
-      socket
-      |> assign_servers()
-
-    {:noreply, socket}
   end
 
   defp assign_servers(socket) do

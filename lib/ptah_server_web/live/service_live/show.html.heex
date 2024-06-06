@@ -16,7 +16,12 @@
 
 <.back navigate={~p"/services"}>Back to services</.back>
 
-<.modal :if={@live_action == :edit} id="service-modal" show on_cancel={JS.patch(~p"/services/#{@service}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="service-modal"
+  show
+  on_cancel={JS.patch(~p"/services/#{@service}")}
+>
   <.live_component
     module={PtahServerWeb.ServiceLive.FormComponent}
     id={@service.id}

@@ -15,6 +15,19 @@ defmodule PtahServerWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_current_api_team
+    plug OpenApiSpex.Plug.PutApiSpec, module: PtahServerWeb.ApiSpec
+  end
+
+  pipeline :api_docs do
+    plug :accepts, ["json"]
+    plug OpenApiSpex.Plug.PutApiSpec, module: PtahServerWeb.ApiSpec
+  end
+
+  scope "/api/v1" do
+    pipe_through :browser
+
+    get "/docs", OpenApiSpex.Plug.SwaggerUI, path: "/api/v1/openapi.json"
   end
 
   scope "/", PtahServerWeb do
@@ -23,10 +36,17 @@ defmodule PtahServerWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", PtahServerWeb do
-  #   pipe_through :api
-  # end
+  scope "/api/v1" do
+    pipe_through :api_docs
+
+    get "/openapi.json", OpenApiSpex.Plug.RenderSpec, []
+  end
+
+  scope "/api/v1", PtahServerWeb do
+    pipe_through :api
+
+    post "/services/:service_id/deploy", ServiceDeployController, :create
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ptah_server, :dev_routes) do

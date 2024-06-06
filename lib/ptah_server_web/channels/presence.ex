@@ -21,7 +21,7 @@ defmodule PtahServerWeb.Presence do
   alias PtahServer.Servers
   alias PtahServerAgent.AgentChannel
   alias PtahProto.Cmd
-  alias PtahServer.Marketplace
+  alias PtahProto.ServiceSpec
   alias PtahServer.Repo
   alias PtahServer.Servers.Server
 
@@ -146,100 +146,30 @@ defmodule PtahServerWeb.Presence do
     })
   end
 
-  def stack_create(stack) do
+  def get_swarm_manager!(swarm) do
     manager =
-      list_online_agents(stack.team_id)
+      list_online_agents(swarm.team_id)
       |> Enum.find(fn agent ->
-        agent.server.swarm_id == stack.swarm_id and agent.server.role == :manager
+        agent.server.swarm_id == swarm.id and agent.server.role == :manager
       end)
 
     if manager == nil do
       raise "Manager not found"
     end
 
-    stack_spec = Marketplace.get_stack(stack.stack_name)
+    manager
+  end
+
+  def stack_create(stack) do
+    manager = get_swarm_manager!(Repo.preload(stack, :swarm).swarm)
 
     AgentChannel.push(manager.socket, %Cmd.CreateStack{
       name: stack.name,
       services:
         Enum.map(stack.services, fn service ->
-          spec = Marketplace.Stack.get_service(stack_spec, service.service_name)
-
           %Cmd.CreateStack.Service{
             service_id: service.id,
-            service_spec: %Cmd.CreateStack.Service.ServiceSpec{
-              name: "#{stack.name}_#{service.service_name}",
-              task_template: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate{
-                container_spec: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec{
-                  name: service.name,
-                  image: spec["image"],
-                  hostname: "#{service.service_name}.#{stack.name}",
-                  env:
-                    Enum.map(spec["env"], fn env ->
-                      %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Env{
-                        name: env["name"],
-                        value: env["value"]
-                      }
-                    end),
-                  mounts:
-                    Enum.map(spec["mounts"], fn mount ->
-                      %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Mount{
-                        type: "bind",
-                        source:
-                          Path.join([
-                            manager.server.mounts_root,
-                            stack.name,
-                            service.service_name,
-                            mount["name"]
-                          ]),
-                        target: mount["target"],
-                        bind_options:
-                          %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.ContainerSpec.Mount.BindOptions{
-                            create_mountpoint: true
-                          }
-                      }
-                    end)
-                },
-                networks: [
-                  %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.Network{
-                    target: "ptah-net",
-                    aliases: [
-                      "#{service.service_name}.#{stack.name}"
-                    ]
-                  }
-                ],
-                placement: %Cmd.CreateStack.Service.ServiceSpec.TaskTemplate.Placement{
-                  constraints:
-                    if service.spec.placement_server_id do
-                      placement_server = Servers.get_server!(service.spec.placement_server_id)
-
-                      [
-                        "node.id == #{placement_server.ext_id}"
-                      ]
-                    else
-                      []
-                    end
-                }
-              },
-              mode: %Cmd.CreateStack.Service.ServiceSpec.Mode{
-                replicated: %Cmd.CreateStack.Service.ServiceSpec.Mode.Replicated{
-                  replicas: 1
-                }
-              },
-              endpoint_spec: %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec{
-                ports:
-                  service.spec.endpoint_spec.ports
-                  |> Enum.filter(& &1.docker.exposed)
-                  |> Enum.map(fn port ->
-                    %Cmd.CreateStack.Service.ServiceSpec.EndpointSpec.Port{
-                      protocol: "tcp",
-                      target_port: Marketplace.Stack.Service.get_port(spec, port.name)["target"],
-                      published_port: port.docker.published_port,
-                      published_mode: "ingress"
-                    }
-                  end)
-              }
-            }
+            service_spec: map_service_spec(manager, stack, service)
           }
         end)
     })
@@ -254,6 +184,94 @@ defmodule PtahServerWeb.Presence do
     end
 
     :ok
+  end
+
+  def service_update(service) do
+    service = Repo.preload(service, :stack)
+
+    manager = get_swarm_manager!(Repo.preload(service.stack, :swarm).swarm)
+
+    AgentChannel.push(manager.socket, %Cmd.UpdateService{
+      service_id: service.id,
+      docker: %Cmd.UpdateService.Docker{
+        service_id: service.ext_id
+      },
+      service_spec: map_service_spec(manager, service.stack, service)
+    })
+  end
+
+  defp map_service_spec(manager, stack, service) do
+    %ServiceSpec{
+      name: "#{stack.name}_#{service.service_name}",
+      task_template: %ServiceSpec.TaskTemplate{
+        container_spec: %ServiceSpec.TaskTemplate.ContainerSpec{
+          name: service.name,
+          image: service.spec.task_template.container_spec.image,
+          hostname: "#{service.service_name}.#{stack.name}",
+          env:
+            Enum.map(service.spec.task_template.container_spec.env, fn env ->
+              %ServiceSpec.TaskTemplate.ContainerSpec.Env{
+                name: env.name,
+                value: env.value
+              }
+            end),
+          mounts:
+            Enum.map(service.spec.task_template.container_spec.mounts, fn mount ->
+              %ServiceSpec.TaskTemplate.ContainerSpec.Mount{
+                type: "bind",
+                source:
+                  Path.join([
+                    manager.server.mounts_root,
+                    stack.name,
+                    service.service_name,
+                    mount.source
+                  ]),
+                target: mount.target,
+                bind_options: %ServiceSpec.TaskTemplate.ContainerSpec.Mount.BindOptions{
+                  create_mountpoint: true
+                }
+              }
+            end)
+        },
+        networks: [
+          %ServiceSpec.TaskTemplate.Network{
+            target: "ptah-net",
+            aliases: [
+              "#{service.service_name}.#{stack.name}"
+            ]
+          }
+        ],
+        placement: %ServiceSpec.TaskTemplate.Placement{
+          constraints:
+            if service.spec.placement_server_id do
+              placement_server = Servers.get_server!(service.spec.placement_server_id)
+
+              [
+                "node.id == #{placement_server.ext_id}"
+              ]
+            else
+              []
+            end
+        }
+      },
+      mode: %ServiceSpec.Mode{
+        replicated: %ServiceSpec.Mode.Replicated{
+          replicas: 1
+        }
+      },
+      endpoint_spec: %ServiceSpec.EndpointSpec{
+        ports:
+          service.spec.endpoint_spec.ports
+          |> Enum.map(fn port ->
+            %ServiceSpec.EndpointSpec.Port{
+              protocol: "tcp",
+              target_port: port.target_port,
+              published_port: port.published_port,
+              published_mode: "ingress"
+            }
+          end)
+      }
+    }
   end
 
   defp team_topic(team_id) do
