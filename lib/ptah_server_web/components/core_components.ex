@@ -19,6 +19,14 @@ defmodule PtahServerWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import PtahServerWeb.Gettext
 
+  attr :value, :any, required: true
+
+  def debug(assigns) do
+    ~H"""
+    <pre><%= inspect(@value, pretty: true) %></pre>
+    """
+  end
+
   @doc """
   Renders a modal.
 
@@ -276,7 +284,9 @@ defmodule PtahServerWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file month number password
-               range search select tel text textarea time url week)
+               range search select tel text textarea time url week
+               hidden
+               )
 
   attr :field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -300,6 +310,12 @@ defmodule PtahServerWeb.CoreComponents do
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> field.value end)
     |> input()
+  end
+
+  def input(%{type: "hidden"} = assigns) do
+    ~H"""
+    <input type="hidden" id={@id} name={@name} value={@value} />
+    """
   end
 
   def input(%{type: "checkbox"} = assigns) do
@@ -415,6 +431,16 @@ defmodule PtahServerWeb.CoreComponents do
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
       <%= render_slot(@inner_block) %>
     </p>
+    """
+  end
+
+  attr :for_field, :any, required: true
+
+  def errors(assigns) do
+    assigns = assign(assigns, :errors, Enum.map(assigns.for_field.errors, &translate_error/1))
+
+    ~H"""
+    <.error :for={msg <- @errors}><%= msg %></.error>
     """
   end
 

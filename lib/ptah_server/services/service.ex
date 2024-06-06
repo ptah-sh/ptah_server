@@ -1,4 +1,5 @@
 defmodule PtahServer.Services.Service do
+  alias PtahServer.Repo
   require Logger
   use Ecto.Schema
   import Ecto.Changeset
@@ -13,7 +14,7 @@ defmodule PtahServer.Services.Service do
     belongs_to :stack, PtahServer.Stacks.Stack
 
     # TODO: extract changesets to maintain better readability
-    embeds_one :spec, ServiceSpec do
+    embeds_one :spec, ServiceSpec, on_replace: :update do
       def changeset(service_spec, attrs) do
         service_spec
         |> cast(attrs, [:bind_volumes, :placement_server_id])
@@ -33,7 +34,7 @@ defmodule PtahServer.Services.Service do
       field :bind_volumes, :boolean
       field :placement_server_id, :integer
 
-      embeds_one :task_template, TaskTemplate do
+      embeds_one :task_template, TaskTemplate, on_replace: :update do
         def changeset(task_template, attrs) do
           task_template
           |> cast(attrs, [])
@@ -52,24 +53,40 @@ defmodule PtahServer.Services.Service do
         #   field :constraints, {:array, :string}
         # end
 
-        embeds_one :container_spec, ContainerSpec do
+        embeds_one :container_spec, ContainerSpec, on_replace: :update do
           def changeset(container_spec, attrs) do
             container_spec
-            |> cast(attrs, [])
-            |> cast_embed(:mounts)
+            |> cast(attrs, [:image])
+            |> cast_embed(:env, sort_param: :env_sort, drop_param: :env_drop)
+            |> cast_embed(:mounts, sort_param: :mounts_sort, drop_param: :mounts_drop)
+            |> validate_required([:image])
 
             #     # |> cast(attrs, [:name, :image, :hostname])
             #     # |> validate_required([:name, :image, :hostname])
           end
 
-          embeds_many :mounts, MountSpec do
-            def changeset(mount_spec, attrs) do
-              mount_spec
-              |> cast(attrs, [:name])
-              |> validate_required([:name])
+          field :image, :string
+
+          embeds_many :env, Env, on_replace: :delete do
+            def changeset(env, attrs) do
+              env
+              |> cast(attrs, [:name, :value])
+              |> validate_required([:name, :value])
             end
 
             field :name, :string
+            field :value, :string
+          end
+
+          embeds_many :mounts, MountSpec, on_replace: :delete do
+            def changeset(mount_spec, attrs) do
+              mount_spec
+              |> cast(attrs, [:source, :target])
+              |> validate_required([:source, :target])
+            end
+
+            field :source, :string
+            field :target, :string
           end
         end
       end
@@ -78,60 +95,33 @@ defmodule PtahServer.Services.Service do
         def changeset(endpoint_spec, attrs) do
           endpoint_spec
           |> cast(attrs, [])
-          |> cast_embed(:ports)
+          |> cast_embed(:ports, sort_param: :ports_sort, drop_param: :ports_drop)
+          |> cast_embed(:caddy, sort_param: :caddy_sort, drop_param: :caddy_drop)
         end
 
-        embeds_many :ports, Port do
-          field :name, :string
-
+        embeds_many :ports, Port, on_replace: :delete do
           def changeset(port, attrs) do
             port
             # TODO: remove name from casts and assign the port name in the form handler
-            |> cast(attrs, [:name])
-            |> validate_required([:name])
-            |> cast_embed(:docker)
-            |> cast_embed(:caddy)
+            |> cast(attrs, [:target_port, :published_port])
+            |> validate_required([:target_port, :published_port])
           end
 
-          embeds_one :docker, Docker do
-            field :exposed, :boolean
-            field :published_port, :integer
+          field :target_port, :integer
+          field :published_port, :integer
+        end
 
-            def changeset(docker, attrs) do
-              docker
-              |> cast(attrs, [:exposed, :published_port])
-              |> validate_required([:exposed])
-              |> validate_required_if_exposed()
-            end
-
-            def validate_required_if_exposed(changeset) do
-              case get_field(changeset, :exposed) do
-                true -> validate_required(changeset, [:published_port])
-                _ -> changeset
-              end
-            end
+        embeds_many :caddy, CaddyHandler, on_replace: :delete do
+          def changeset(caddy, attrs) do
+            caddy
+            |> cast(attrs, [:target_port, :domain, :published_port, :path])
+            |> validate_required([:target_port, :domain, :published_port, :path])
           end
 
-          embeds_one :caddy, Caddy do
-            def changeset(caddy, attrs) do
-              caddy
-              |> cast(attrs, [:enabled, :domain, :port, :path])
-              |> validate_required([:enabled])
-              |> validate_required_if_enabled()
-            end
-
-            def validate_required_if_enabled(changeset) do
-              case get_field(changeset, :enabled) do
-                true -> validate_required(changeset, [:domain, :port, :path])
-                _ -> changeset
-              end
-            end
-
-            field :enabled, :boolean
-            field :domain, :string
-            field :port, :integer
-            field :path, :string
-          end
+          field :target_port, :integer
+          field :domain, :string
+          field :published_port, :integer
+          field :path, :string
         end
       end
     end

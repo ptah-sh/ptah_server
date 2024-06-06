@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "postgresql",
+  "version": "0.1.0",
+  "description": "PostgreSQL database server.",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "inputs": [
+    {
+      "name": "pg_password",
+      "value": "postgres",
+      "description": "PostgreSQL user password.",
+      "required": true,
+      "secret": true
+    }
+  ],
+  "services": [
+    {
+      "name": "postgresql",
+      "description": "PostgreSQL database server.",
+      "image": "bitnami/postgresql:16",
+      "env": [
+        {
+          "name": "POSTGRESQL_PASSWORD",
+          "value": "${inputs.pg_password}"
+        }
+      ],
+      "ports": [
+        {
+          "name": "db",
+          "target": 5432,
+          "protocol": "tcp",
+          "description": "PostgreSQL port"
+        }
+      ],
+      "mounts": [
+        {
+          "name": "volume_dir",
+          "target": "/bitnami/postgresql",
+          "description": "PostgreSQL persistence base directory."
+        }
+      ]
+    }
+  ]
+}

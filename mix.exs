@@ -64,7 +64,10 @@ defmodule PtahServer.MixProject do
       # tesla for http requests
       {:tesla, "~> 1.4"},
       # hackney for tesla
-      {:hackney, "~> 1.17"}
+      {:hackney, "~> 1.17"},
+
+      # Swagger
+      {:open_api_spex, "~> 3.19"}
     ]
   end
 

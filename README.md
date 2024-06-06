@@ -16,3 +16,7 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - Docs: https://hexdocs.pm/phoenix
 - Forum: https://elixirforum.com/c/phoenix-forum
 - Source: https://github.com/phoenixframework/phoenix
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ptah-sh/ptah_server&type=Date)](https://star-history.com/#ptah-sh/ptah_server&Date)

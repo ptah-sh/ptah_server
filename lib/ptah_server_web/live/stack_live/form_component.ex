@@ -14,13 +14,13 @@ defmodule PtahServerWeb.StackLive.FormComponent do
   def mount(socket) do
     swarms = Enum.map(Repo.all(Swarm), &{&1.name, &1.id})
 
-    stacks = Enum.map(Marketplace.list_stacks(), &{&1["name"], &1["name"]})
+    stacks =
+      Enum.map(Marketplace.list_stacks(), &{&1["name"], &1["name"]}) ++ [{"custom", "@custom@"}]
 
     socket =
       socket
       |> assign(:swarms, swarms)
       |> assign(:stacks, stacks)
-      |> assign(:stack_schema, nil)
 
     {:ok, socket}
   end
@@ -59,22 +59,47 @@ defmodule PtahServerWeb.StackLive.FormComponent do
           phx-change="change_stack"
         />
 
-        <%= if (@stack_schema) do %>
+        <%= if @form[:stack_name].value && @form[:stack_name].value != "" do %>
+          <.input field={@form[:stack_version]} type="hidden" />
+
           <.input field={@form[:name]} type="text" label="Name" />
 
           <h2 class="text-xl font-semibold">
-            <%= @stack_schema["name"] %>@<%= @stack_schema["version"] %>
+            <%!-- <%= @stack_schema["name"] %>@<%= @stack_schema["version"] %> --%>
           </h2>
 
-          <p class="text-sm"><%= @stack_schema["description"] %></p>
+          <div>
+            Services
+            <.button
+              type="button"
+              name={"#{@form[:services_sort].name}[]"}
+              value="new"
+              phx-click={JS.dispatch("change")}
+            >
+              Add
+            </.button>
+          </div>
+
+          <%!-- <.error :for={msg <- Enum.map(@form[:services].errors, &CoreComponents.translate_error(&1))}>
+            <%= msg %>
+          </.error> --%>
+          <.errors for_field={@form[:services]} />
+
+          <%!-- <p class="text-sm"><%= @stack_schema["description"] %></p> --%>
           <.inputs_for :let={service} field={@form[:services]}>
+            <.button
+              type="button"
+              name={"#{@form[:services_drop].name}[]"}
+              value={service.index}
+              phx-click={JS.dispatch("change")}
+            >
+              Remove
+            </.button>
             <.live_component
               module={ServiceComponent}
               id={service.id}
               field={service}
-              stack_schema={Enum.at(@stack_schema["services"], service.index)}
               swarm_id={@form[:swarm_id].value}
-              stack_name={@form[:name].value}
             />
           </.inputs_for>
         <% end %>
@@ -117,7 +142,7 @@ defmodule PtahServerWeb.StackLive.FormComponent do
       socket.assigns.form.params
       |> Map.merge(stack_params)
       |> Map.update!("services", fn services ->
-        Enum.map(services, &Map.delete(&1, "server_id"))
+        Enum.map(services, &Map.delete(&1, "placement_server_id"))
       end)
 
     changeset =
@@ -138,65 +163,28 @@ defmodule PtahServerWeb.StackLive.FormComponent do
     stack_params =
       Map.merge(stack_params, %{"swarm_id" => socket.assigns.form[:swarm_id].value})
 
-    Logger.warning("stack_params: #{inspect(stack_params)}")
-
-    socket =
-      if stack_params["stack_name"] do
-        assign(socket, :stack_schema, Marketplace.get_stack(stack_params["stack_name"]))
-      else
-        assign(socket, :stack_schema, nil)
-      end
-
-    stack_schema = socket.assigns.stack_schema
-
-    stack_params =
-      if stack_schema do
-        Map.merge(stack_params, %{"name" => stack_schema["name"]})
-      else
-        Map.merge(stack_params, %{"name" => ""})
-      end
-
-    stack_params =
-      if socket.assigns.stack_schema do
-        Map.merge(stack_params, %{
-          "services" =>
-            Enum.map(stack_schema["services"], fn service_spec ->
-              %{
-                "spec" => %{
-                  "task_template" => %{
-                    "container_spec" => %{
-                      "mounts" => Enum.map(service_spec["mounts"], &%{"name" => &1["name"]})
-                    }
-                  },
-                  "endpoint_spec" => %{
-                    "ports" =>
-                      Enum.map(
-                        service_spec["ports"],
-                        &%{"name" => &1["name"], "published_port" => nil}
-                      )
-                  }
-                }
-              }
-            end)
-        })
-      else
-        stack_params
+    stack_assigns =
+      case stack_params["stack_name"] do
+        "@custom@" -> %{}
+        "" -> %{}
+        stack_name -> map_stack_template_to_form(stack_name)
       end
 
     changeset =
       socket.assigns.stack
-      |> Stacks.change_stack(stack_params)
+      |> Stacks.change_stack(Map.merge(stack_params, stack_assigns))
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
   end
 
+  @impl true
   def handle_event("save", %{"stack" => stack_params}, socket) do
     save_stack(socket, socket.assigns.action, stack_params)
   end
 
   defp save_stack(socket, :new, stack_params) do
-    stack_params = assign_stack_params(stack_params, socket)
+    # stack_params = assign_stack_params(stack_params, socket)
 
     case Stacks.create_stack(stack_params) do
       {:ok, stack} ->
@@ -219,43 +207,43 @@ defmodule PtahServerWeb.StackLive.FormComponent do
     assign(socket, :form, to_form(changeset))
   end
 
-  defp assign_stack_params(stack_params, socket) do
-    stack_schema = socket.assigns.stack_schema
+  defp map_stack_template_to_form(stack_name) do
+    stack_template = Marketplace.get_stack(stack_name)
 
-    if stack_schema do
-      Map.merge(stack_params, %{
-        "stack_name" => stack_schema["name"],
-        "stack_version" => stack_schema["version"],
-        "services" =>
-          Enum.with_index(stack_schema["services"], fn service_spec, index ->
-            map_service_params(
-              stack_params,
-              stack_params["services"][Integer.to_string(index)],
-              service_spec
-            )
-          end)
-      })
-    else
-      stack_params
-    end
-  end
-
-  defp map_service_params(stack_params, service_params, service_spec) do
-    Map.merge(
-      service_params,
-      %{
-        "name" => "#{stack_params["name"]}_#{service_spec["name"]}",
-        "service_name" => service_spec["name"],
-        "spec" =>
-          Map.put(
-            service_params["spec"],
-            "task_template",
-            Map.put(service_params["spec"]["task_template"] || %{}, "container_spec", %{
-              "mounts" => Enum.map(service_spec["mounts"], &%{"name" => &1["name"]})
-            })
-          )
-      }
-    )
+    %{
+      "name" => stack_template["name"],
+      "stack_name" => stack_template["name"],
+      "stack_version" => stack_template["version"],
+      "services" =>
+        Enum.map(stack_template["services"], fn service ->
+          %{
+            "name" => service["name"],
+            "service_name" => service["name"],
+            "spec" => %{
+              "bind_volumes" => !Enum.empty?(service["mounts"]),
+              "task_template" => %{
+                "container_spec" => %{
+                  "image" => service["image"],
+                  "env" =>
+                    Enum.map(service["env"], fn env ->
+                      %{
+                        "name" => env["name"],
+                        "value" => env["value"]
+                      }
+                    end),
+                  "mounts" =>
+                    Enum.map(service["mounts"], fn mount ->
+                      %{
+                        "source" => mount["target"],
+                        "target" => mount["target"]
+                      }
+                    end)
+                }
+              }
+            }
+          }
+        end)
+    }
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
