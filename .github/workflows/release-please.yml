@@ -7,6 +7,7 @@ permissions:
   contents: write
   packages: write
   pull-requests: write
+  id-token: write
 
 name: release-please
 
@@ -72,11 +73,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ptah-sh/ptah_server
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ptah-sh/ptah_server:latest,ptah-sh/ptah_server:${{ needs.release-please.outputs.tag_name }}
+          tags: latest,${{ needs.release-please.outputs.tag_name }},${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 # TODO: should we create a github deployment?
 #   deploy:
 #     runs-on: ubuntu-latest
