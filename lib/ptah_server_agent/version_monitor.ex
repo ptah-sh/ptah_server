@@ -59,8 +59,6 @@ defmodule PtahServerAgent.VersionMonitor do
     {:ok, latest} =
       Tesla.get(client, "https://api.github.com/repos/ptah-sh/ptah_agent/releases/latest")
 
-    dbg()
-
     if Enum.empty?(latest.body["assets"]) do
       nil
     else

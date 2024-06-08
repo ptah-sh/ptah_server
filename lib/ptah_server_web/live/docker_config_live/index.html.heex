@@ -1,0 +1,42 @@
+<.header>
+  Listing Docker configs
+  <:actions>
+    <.link patch={~p"/docker_configs/new"}>
+      <.button>New Docker config</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="docker_configs"
+  rows={@streams.docker_configs}
+  row_click={fn {_id, docker_config} -> JS.navigate(~p"/docker_configs/#{docker_config}") end}
+>
+  <:col :let={{_id, docker_config}} label="Name"><%= docker_config.name %></:col>
+  <:col :let={{_id, docker_config}} label="Ext"><%= docker_config.ext_id %></:col>
+  <:action :let={{_id, docker_config}}>
+    <div class="sr-only">
+      <.link navigate={~p"/docker_configs/#{docker_config}"}>Show</.link>
+    </div>
+    <.link patch={~p"/docker_configs/#{docker_config}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, docker_config}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: docker_config.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="docker_config-modal" show on_cancel={JS.patch(~p"/docker_configs")}>
+  <.live_component
+    module={PtahServerWeb.DockerConfigLive.FormComponent}
+    id={@docker_config.id || :new}
+    title={@page_title}
+    action={@live_action}
+    docker_config={@docker_config}
+    patch={~p"/docker_configs"}
+  />
+</.modal>

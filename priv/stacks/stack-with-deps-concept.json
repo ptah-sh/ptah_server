@@ -1,0 +1,64 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "ptah-server",
+  "version": "0.1.0",
+  "description": "Stack describing the Ptah services running on the cluster (except an Agent service which is a system daemon).",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "wants": [
+    {
+      "name": "postgresql",
+      "version": "0.1.0"
+    }
+  ],
+  "services": [
+    {
+      "name": "caddy",
+      "description": "The reverse proxy that powers Ptah Swarm cluster.",
+      "image": "caddy:2.8-alpine",
+      "inputs": [
+        {
+          "name": "pg_user",
+          "value": "${wants.postgresql.postgresql.user}",
+          "description": "PostgreSQL user name."
+        },
+        {
+          "name": "pg_password",
+          "value": "${wants.postgresql.inputs.password}",
+          "description": "PostgreSQL user password."
+        },
+        {
+          "name": "pg_host",
+          "value": "${wants.postgresql.postgresql.hostname}",
+          "description": "PostgreSQL server host."
+        },
+        {
+          "name": "pg_port",
+          "value": "${wants.postgresql.postgresql.port}",
+          "description": "PostgreSQL server port."
+        },
+        {
+          "name": "pg_db",
+          "value": "${wants.postgresql.postgresql.db}",
+          "description": "PostgreSQL database name."
+        }
+      ],
+      "env": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://${inputs.pg_user}:${inputs.pg_password}@${inputs.pg_host}:${inputs.pg_port}/${inputs.pg_db}"
+        }
+      ],
+      "ports": [
+        {
+          "name": "http",
+          "target": 4000,
+          "protocol": "tcp",
+          "description": "Ptah HTTP port."
+        }
+      ]
+    }
+  ]
+}

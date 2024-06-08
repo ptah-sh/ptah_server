@@ -7,15 +7,6 @@
   "author": "Bohdan Shulha <b.shulha@pm.me>",
   "homepage": "https://ptah.sh",
   "license": "MIT",
-  "inputs": [
-    {
-      "name": "pg_password",
-      "value": "postgres",
-      "description": "PostgreSQL user password.",
-      "required": true,
-      "secret": true
-    }
-  ],
   "services": [
     {
       "name": "postgresql",
@@ -24,7 +15,7 @@
       "env": [
         {
           "name": "POSTGRESQL_PASSWORD",
-          "value": "${inputs.pg_password}"
+          "value": ""
         }
       ],
       "ports": [

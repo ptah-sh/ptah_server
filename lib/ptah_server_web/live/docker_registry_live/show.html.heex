@@ -1,0 +1,26 @@
+<.header>
+  Docker registry <%= @docker_registry.id %>
+  <:subtitle>This is a docker_registry record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/docker_registries/#{@docker_registry}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit docker_registry</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @docker_registry.name %></:item>
+</.list>
+
+<.back navigate={~p"/docker_registries"}>Back to docker_registries</.back>
+
+<.modal :if={@live_action == :edit} id="docker_registry-modal" show on_cancel={JS.patch(~p"/docker_registries/#{@docker_registry}")}>
+  <.live_component
+    module={PtahServerWeb.DockerRegistryLive.FormComponent}
+    id={@docker_registry.id}
+    title={@page_title}
+    action={@live_action}
+    docker_registry={@docker_registry}
+    patch={~p"/docker_registries/#{@docker_registry}"}
+  />
+</.modal>

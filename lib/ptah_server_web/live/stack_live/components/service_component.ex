@@ -1,5 +1,6 @@
 defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
   require Logger
+  alias PtahServer.DockerRegistries
   alias PtahServer.Servers
   use PtahServerWeb, :live_component
 
@@ -8,6 +9,7 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
     socket =
       socket
       |> assign(:servers, [])
+      |> assign(:docker_registries, [])
 
     {:ok, socket}
   end
@@ -34,6 +36,13 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
       <.inputs_for :let={spec_field} field={@field[:spec]}>
         <.inputs_for :let={task_template} field={spec_field[:task_template]}>
           <.inputs_for :let={container_spec} field={task_template[:container_spec]}>
+            <.input
+              field={container_spec[:docker_registry_id]}
+              type="select"
+              label="Docker Registry"
+              options={@docker_registries}
+            />
+
             <.input field={container_spec[:image]} type="text" label="Image" />
 
             <div>
@@ -213,6 +222,7 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
       socket
       |> assign(assigns)
       |> assign_servers()
+      |> assign_docker_registries()
 
     {:ok, socket}
   end
@@ -227,5 +237,15 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
       end
 
     assign(socket, :servers, servers)
+  end
+
+  defp assign_docker_registries(socket) do
+    registries = DockerRegistries.list_by_swarm_id(socket.assigns.swarm_id)
+
+    assign(
+      socket,
+      :docker_registries,
+      [{"Docker Hub", ""}] ++ Enum.map(registries, &{&1.name, &1.id})
+    )
   end
 end

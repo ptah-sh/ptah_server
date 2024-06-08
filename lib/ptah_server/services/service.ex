@@ -1,5 +1,4 @@
 defmodule PtahServer.Services.Service do
-  alias PtahServer.Repo
   require Logger
   use Ecto.Schema
   import Ecto.Changeset
@@ -56,7 +55,7 @@ defmodule PtahServer.Services.Service do
         embeds_one :container_spec, ContainerSpec, on_replace: :update do
           def changeset(container_spec, attrs) do
             container_spec
-            |> cast(attrs, [:image])
+            |> cast(attrs, [:docker_registry_id, :image])
             |> cast_embed(:env, sort_param: :env_sort, drop_param: :env_drop)
             |> cast_embed(:mounts, sort_param: :mounts_sort, drop_param: :mounts_drop)
             |> validate_required([:image])
@@ -66,6 +65,8 @@ defmodule PtahServer.Services.Service do
           end
 
           field :image, :string
+
+          belongs_to :docker_registry, PtahServer.DockerRegistries.DockerRegistry
 
           embeds_many :env, Env, on_replace: :delete do
             def changeset(env, attrs) do

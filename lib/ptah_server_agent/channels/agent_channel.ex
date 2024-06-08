@@ -1,4 +1,5 @@
 defmodule PtahServerAgent.AgentChannel do
+  alias PtahServer.DockerConfigs.DockerConfig
   alias PtahServer.Servers
   alias PtahServer.Services.Service
   alias PtahServer.Swarms.Swarm
@@ -75,6 +76,18 @@ defmodule PtahServerAgent.AgentChannel do
     Presence.swarm_created(server, %{})
 
     {:noreply, assign(socket, :server, server)}
+  end
+
+  @impl PtahProto
+  def handle_packet(%Event.ConfigCreated{} = packet, socket) do
+    config = Repo.get_by(DockerConfig, id: packet.config_id)
+
+    {:ok, _} =
+      config
+      |> Ecto.Changeset.change(ext_id: packet.docker.config_id)
+      |> Repo.update()
+
+    {:noreply, socket}
   end
 
   @impl true

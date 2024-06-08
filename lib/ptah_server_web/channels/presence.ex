@@ -274,6 +274,16 @@ defmodule PtahServerWeb.Presence do
     }
   end
 
+  def docker_config_create(config, data) do
+    manager = get_swarm_manager!(Repo.preload(config, :swarm).swarm)
+
+    AgentChannel.push(manager.socket, %Cmd.CreateConfig{
+      config_id: config.id,
+      name: config.name,
+      data: data
+    })
+  end
+
   defp team_topic(team_id) do
     "team:#{team_id}"
   end

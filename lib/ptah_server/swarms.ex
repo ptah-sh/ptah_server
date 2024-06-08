@@ -131,34 +131,25 @@ defmodule PtahServer.Swarms do
   end
 
   defp map_service_to_caddy(service, stack_name) do
-    ports =
-      service.spec.endpoint_spec.ports
-      |> Enum.filter(& &1.caddy.enabled)
+    caddy = service.spec.endpoint_spec.caddy
 
-    if length(ports) == 0 do
+    if length(caddy) == 0 do
       %{}
     else
-      Enum.reduce(ports, %{}, fn port, acc ->
-        container_port =
-          Marketplace.get_stack(
-            Repo.preload(service, :stack, skip_team_id: true).stack.stack_name
-          )
-          |> Marketplace.Stack.get_service(service.service_name)
-          |> Marketplace.Stack.Service.get_port(port.name)
-
+      Enum.reduce(caddy, %{}, fn caddy, acc ->
         Map.put(
           acc,
-          port.caddy.port,
-          (acc[port] || []) ++
+          caddy.published_port,
+          (acc[caddy.published_port] || []) ++
             [
               %{
                 "match" => [
                   %{
                     "host" => [
-                      port.caddy.domain
+                      caddy.domain
                     ],
                     "path" => [
-                      port.caddy.path
+                      caddy.path
                     ]
                   }
                 ],
@@ -167,8 +158,7 @@ defmodule PtahServer.Swarms do
                     "handler" => "reverse_proxy",
                     "upstreams" => [
                       %{
-                        "dial" =>
-                          "#{service.service_name}.#{stack_name}:#{container_port["target"]}"
+                        "dial" => "#{service.service_name}.#{stack_name}:#{caddy.target_port}"
                       }
                     ]
                   }

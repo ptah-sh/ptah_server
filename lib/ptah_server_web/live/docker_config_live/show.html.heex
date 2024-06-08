@@ -1,0 +1,27 @@
+<.header>
+  Docker config <%= @docker_config.id %>
+  <:subtitle>This is a docker_config record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/docker_configs/#{@docker_config}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit docker_config</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @docker_config.name %></:item>
+  <:item title="Ext"><%= @docker_config.ext_id %></:item>
+</.list>
+
+<.back navigate={~p"/docker_configs"}>Back to docker_configs</.back>
+
+<.modal :if={@live_action == :edit} id="docker_config-modal" show on_cancel={JS.patch(~p"/docker_configs/#{@docker_config}")}>
+  <.live_component
+    module={PtahServerWeb.DockerConfigLive.FormComponent}
+    id={@docker_config.id}
+    title={@page_title}
+    action={@live_action}
+    docker_config={@docker_config}
+    patch={~p"/docker_configs/#{@docker_config}"}
+  />
+</.modal>
