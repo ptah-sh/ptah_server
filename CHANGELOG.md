@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/ptah-sh/ptah_server/compare/v1.0.2...v1.0.3) (2024-06-08)
+
+
+### Bug Fixes
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) try fix tags ([153de6a](https://github.com/ptah-sh/ptah_server/commit/153de6a66bf200535de1ab00dbcbd1b257ff5773))
+
 ## [1.0.2](https://github.com/ptah-sh/ptah_server/compare/v1.0.1...v1.0.2) (2024-06-08)
 
 
