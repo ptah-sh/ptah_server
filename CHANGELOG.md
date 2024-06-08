@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/ptah-sh/ptah_server/compare/v1.0.1...v1.0.2) (2024-06-08)
+
+
+### Bug Fixes
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) try correct metadata ([322a4c9](https://github.com/ptah-sh/ptah_server/commit/322a4c9a6532852763e15bf639c7e4eee646c819))
+
 ## [1.0.1](https://github.com/ptah-sh/ptah_server/compare/v1.0.0...v1.0.1) (2024-06-08)
 
 
