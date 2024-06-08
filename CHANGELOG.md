@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/ptah-sh/ptah_server/compare/v1.0.0...v1.0.1) (2024-06-08)
+
+
+### Bug Fixes
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) gh token permissions ([90818bc](https://github.com/ptah-sh/ptah_server/commit/90818bce3d6df3c8d497bddeffa1faa37ba34d1d))
+
 ## 1.0.0 (2024-06-08)
 
 
