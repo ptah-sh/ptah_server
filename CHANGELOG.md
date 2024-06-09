@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/ptah-sh/ptah_server/compare/v1.0.3...v1.1.0) (2024-06-09)
+
+
+### Features
+
+* [#26](https://github.com/ptah-sh/ptah_server/issues/26) add advertise_addr to sarm creation form ([5d2f920](https://github.com/ptah-sh/ptah_server/commit/5d2f920ed69bd5d056b72ee7c496a783eaae1812))
+
 ## [1.0.3](https://github.com/ptah-sh/ptah_server/compare/v1.0.2...v1.0.3) (2024-06-08)
 
 
