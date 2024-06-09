@@ -11,7 +11,7 @@
     {
       "name": "ptah_server",
       "description": "Ptah.sh application server.",
-      "image": "ptah-sh/ptah_server",
+      "image": "ghcr.io/ptah-sh/ptah_server:latest",
       "env": [
         {
           "name": "DATABASE_URL",
@@ -25,7 +25,8 @@
           "protocol": "tcp",
           "description": "Ptah HTTP port."
         }
-      ]
+      ],
+      "mounts": []
     }
   ]
 }

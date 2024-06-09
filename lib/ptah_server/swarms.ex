@@ -4,7 +4,6 @@ defmodule PtahServer.Swarms do
   """
 
   import Ecto.Query, warn: false
-  alias PtahServer.Marketplace
   alias PtahServer.Repo
 
   alias PtahServer.Swarms.Swarm

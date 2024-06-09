@@ -24,8 +24,23 @@ defmodule PtahServer.DockerRegistries.DockerRegistry do
   def changeset(docker_registry, attrs) do
     # TODO: add validate_belongs_to_team(...) for swarms, configs and all other data.
     docker_registry
-    |> cast(attrs, [:team_id, :swarm_id, :config_id, :username, :name, :endpoint, :password])
-    |> validate_required([:swarm_id, :config_id, :username, :name, :endpoint, :password])
+    |> cast(attrs, [
+      :team_id,
+      :swarm_id,
+      :config_id,
+      :name,
+      :endpoint,
+      :username,
+      :password
+    ])
+    |> validate_required([
+      :swarm_id,
+      :config_id,
+      :name,
+      :endpoint,
+      :username,
+      :password
+    ])
     |> maybe_put_team_id()
   end
 end

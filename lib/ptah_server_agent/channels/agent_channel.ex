@@ -20,7 +20,20 @@ defmodule PtahServerAgent.AgentChannel do
 
       Repo.put_team_id(server.team_id)
 
-      {:ok, server} = Servers.update_server(server, %{mounts_root: payload.mounts_root})
+      {:ok, server} =
+        Servers.update_server(server, %{
+          mounts_root: payload.mounts_root,
+          networks:
+            payload.networks
+            |> Enum.map(fn network ->
+              %{
+                name: network.name,
+                ips:
+                  network.ips
+                  |> Enum.map(fn ip -> %{version: ip.version, address: ip.address} end)
+              }
+            end)
+        })
 
       send(self(), {:after_join, payload})
 

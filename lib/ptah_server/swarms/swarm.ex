@@ -16,8 +16,9 @@ defmodule PtahServer.Swarms.Swarm do
   @doc false
   def changeset(swarm, attrs) do
     swarm
-    |> cast(attrs, [:team_id, :name, :ext_id])
-    |> validate_required([:team_id, :name])
+    |> cast(attrs, [:name, :ext_id])
+    |> validate_required([:name])
+    |> maybe_put_team_id()
     |> validate_unique([:team_id, :name])
   end
 end

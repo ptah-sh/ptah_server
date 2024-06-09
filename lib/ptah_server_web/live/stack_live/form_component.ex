@@ -141,7 +141,7 @@ defmodule PtahServerWeb.StackLive.FormComponent do
     params =
       socket.assigns.form.params
       |> Map.merge(stack_params)
-      |> Map.update!("services", fn services ->
+      |> Map.update("services", [], fn services ->
         Enum.map(services, &Map.delete(&1, "placement_server_id"))
       end)
 

@@ -53,10 +53,16 @@ defmodule PtahServerWeb.ServerLive.Show do
   end
 
   @impl true
-  def handle_event("create_swarm", _unsigned_params, socket) do
-    PtahServerWeb.Presence.swarm_create(socket.assigns.server)
+  def handle_info(
+        {PtahServerWeb.SwarmLive.FormComponent, {:saved, _swarm}},
+        socket
+      ) do
+    {:noreply, assign(socket, :server, Repo.preload(socket.assigns.server, :swarm))}
+  end
 
-    {:noreply, socket}
+  @impl true
+  def handle_event("create_swarm", _unsigned_params, socket) do
+    {:noreply, socket |> assign(:live_action, :create_swarm)}
   end
 
   @impl true

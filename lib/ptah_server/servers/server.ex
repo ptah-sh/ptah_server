@@ -14,6 +14,28 @@ defmodule PtahServer.Servers.Server do
     belongs_to :team, PtahServer.Teams.Team
     belongs_to :swarm, PtahServer.Swarms.Swarm
 
+    embeds_many :networks, Network, on_replace: :delete do
+      def changeset(network, attrs) do
+        network
+        |> cast(attrs, [:name])
+        |> cast_embed(:ips, required: true)
+        |> validate_required([:name])
+      end
+
+      field :name, :string
+
+      embeds_many :ips, IP, on_replace: :delete do
+        def changeset(ip, attrs) do
+          ip
+          |> cast(attrs, [:version, :address])
+          |> validate_required([:version, :address])
+        end
+
+        field :version, :string
+        field :address, :string
+      end
+    end
+
     timestamps(type: :utc_datetime)
   end
 
@@ -21,6 +43,7 @@ defmodule PtahServer.Servers.Server do
   def changeset(server, attrs) do
     server
     |> cast(attrs, [:name, :mounts_root])
+    |> cast_embed(:networks, required: true)
     |> validate_required([:name])
     |> ensure_team_id()
     |> ensure_agent_token()

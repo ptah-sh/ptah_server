@@ -1,7 +1,7 @@
 {
   "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
 
-  "name": "ptah-swarm",
+  "name": "ptah",
   "version": "0.1.0",
   "description": "Stack describing the Ptah services running on the cluster (except an Agent service which is a system daemon).",
   "author": "Bohdan Shulha <b.shulha@pm.me>",

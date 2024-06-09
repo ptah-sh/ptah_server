@@ -131,18 +131,17 @@ defmodule PtahServerWeb.Presence do
     Phoenix.PubSub.subscribe(PtahServer.PubSub, server_live_topic(server_id))
   end
 
-  def swarm_create(server) do
-    {:ok, swarm} =
-      Repo.insert(%PtahServer.Swarms.Swarm{
-        name: "auto created via #{server.id}",
-        team_id: server.team_id,
-        ext_id: ""
-      })
-
+  def swarm_init(
+        server,
+        swarm,
+        %{listen_addr: listen_addr, advertise_addr: advertise_addr} = _params
+      ) do
     state = get_state(server.id)
 
     AgentChannel.push(state.socket, %Cmd.CreateSwarm{
-      swarm_id: swarm.id
+      swarm_id: swarm.id,
+      listen_addr: listen_addr,
+      advertise_addr: advertise_addr
     })
   end
 

@@ -70,6 +70,22 @@
 <.back navigate={~p"/servers"}>Back to servers</.back>
 
 <.modal
+  :if={@live_action == :create_swarm}
+  id="swarm-modal"
+  show
+  on_cancel={JS.patch(~p"/servers/#{@server}")}
+>
+  <.live_component
+    module={PtahServerWeb.SwarmLive.FormComponent}
+    id={@server.id}
+    title={"Initialize Docker Swarm for #{@server.name}"}
+    action={:new}
+    server={@server}
+    patch={~p"/servers/#{@server}"}
+  />
+</.modal>
+
+<.modal
   :if={@live_action == :edit}
   id="server-modal"
   show

@@ -14,8 +14,19 @@
       "image": "bitnami/postgresql:16",
       "env": [
         {
+          "name": "POSTGRESQL_DATABASE",
+          "value": "ptah_sh",
+          "description": "PostgreSQL database name"
+        },
+        {
+          "name": "POSTGRESQL_USERNAME",
+          "value": "ptah_sh",
+          "description": "PostgreSQL user name"
+        },
+        {
           "name": "POSTGRESQL_PASSWORD",
-          "value": ""
+          "value": "ptah_sh",
+          "description": "PostgreSQL user password"
         }
       ],
       "ports": [

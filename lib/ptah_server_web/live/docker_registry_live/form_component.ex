@@ -35,12 +35,15 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
         <.input field={@form[:swarm_id]} type="select" label="Swarm" options={@swarms} />
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:endpoint]} type="text" label="Endpoint" />
+        <small>e.x. ghcr.io</small>
+
         <.input field={@form[:username]} type="text" label="Username" />
         <.input field={@form[:password]} type="password" label="Password" />
         <small>Passwords are NOT stored on the Ptah.sh servers.</small>
         <small>
           Sensitive data is transfered directly to an Agent instances and stored in secrets/configs.
         </small>
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Docker registry</.button>
         </:actions>
@@ -93,14 +96,23 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
   # end
 
   defp save_docker_registry(socket, :new, docker_registry_params) do
-    {:ok, docker_config} =
-      DockerConfigs.create_docker_config(%{
-        name:
-          "registry-credentials-#{docker_registry_params["swarm_id"]}-#{docker_registry_params["name"]}",
-        swarm_id: docker_registry_params["swarm_id"]
-      })
+    changeset =
+      socket.assigns.docker_registry
+      |> DockerRegistries.change_docker_registry(docker_registry_params)
 
-    docker_registry_params = Map.put(docker_registry_params, "config_id", docker_config.id)
+    {docker_config, docker_registry_params} =
+      if changeset.valid? do
+        {:ok, docker_config} =
+          DockerConfigs.create_docker_config(%{
+            name:
+              "registry-credentials-#{docker_registry_params["swarm_id"]}-#{docker_registry_params["name"]}",
+            swarm_id: docker_registry_params["swarm_id"]
+          })
+
+        {docker_config, Map.put(docker_registry_params, "config_id", docker_config.id)}
+      else
+        {nil, docker_registry_params}
+      end
 
     case DockerRegistries.create_docker_registry(docker_registry_params) do
       {:ok, docker_registry} ->
