@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/ptah-sh/ptah_server/compare/v1.1.0...v1.2.0) (2024-06-11)
+
+
+### Features
+
+* [#12](https://github.com/ptah-sh/ptah_server/issues/12) add postgresql stack ([b0be174](https://github.com/ptah-sh/ptah_server/commit/b0be1744f383d224432e848425b0f57e18bd0a7c))
+
 ## [1.1.0](https://github.com/ptah-sh/ptah_server/compare/v1.0.3...v1.1.0) (2024-06-09)
 
 
