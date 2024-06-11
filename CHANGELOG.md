@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/ptah-sh/ptah_server/compare/v1.2.0...v1.3.0) (2024-06-11)
+
+
+### Features
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) fix server startup script ([3a7f82c](https://github.com/ptah-sh/ptah_server/commit/3a7f82cf713c24e52216bdf96be3180fc9869ad3))
+
 ## [1.2.0](https://github.com/ptah-sh/ptah_server/compare/v1.1.0...v1.2.0) (2024-06-11)
 
 
