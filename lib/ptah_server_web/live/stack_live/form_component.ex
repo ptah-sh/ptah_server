@@ -141,9 +141,38 @@ defmodule PtahServerWeb.StackLive.FormComponent do
     params =
       socket.assigns.form.params
       |> Map.merge(stack_params)
-      |> Map.update("services", [], fn services ->
-        Enum.map(services, &Map.delete(&1, "placement_server_id"))
-      end)
+
+    params =
+      if Map.has_key?(params, "services") do
+        Map.update!(params, "services", fn services ->
+          Logger.debug("services: #{inspect(services)}")
+
+          # TODO: move list to map conversion to the form initialization.
+          #   Currently the form is initialized as a list, but it is being changed to map after first interaction with the form
+          services =
+            if is_list(services) do
+              services
+              |> Enum.with_index()
+              |> Enum.map(fn {service, index} ->
+                {index, service}
+              end)
+              |> Map.new()
+            else
+              services
+            end
+
+          services
+          |> Enum.map(fn {key, service} ->
+            {key,
+             Map.update(service, "spec", %{}, fn spec ->
+               Map.delete(spec, "placement_server_id")
+             end)}
+          end)
+          |> Map.new(& &1)
+        end)
+      else
+        params
+      end
 
     changeset =
       socket.assigns.stack
@@ -234,7 +263,7 @@ defmodule PtahServerWeb.StackLive.FormComponent do
                   "mounts" =>
                     Enum.map(service["mounts"], fn mount ->
                       %{
-                        "source" => mount["target"],
+                        "name" => mount["name"],
                         "target" => mount["target"]
                       }
                     end)

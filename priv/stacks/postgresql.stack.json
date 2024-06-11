@@ -39,7 +39,7 @@
       ],
       "mounts": [
         {
-          "name": "volume_dir",
+          "name": "data",
           "target": "/bitnami/postgresql",
           "description": "PostgreSQL persistence base directory."
         }

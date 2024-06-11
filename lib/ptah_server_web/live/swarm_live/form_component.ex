@@ -18,8 +18,6 @@ defmodule PtahServerWeb.SwarmLive.FormComponent do
 
   require Logger
   alias PtahServerWeb.Presence
-  alias PtahServerAgent.AgentChannel
-  alias PtahProto.Cmd
   use PtahServerWeb, :live_component
 
   alias PtahServer.Swarms
@@ -112,6 +110,7 @@ defmodule PtahServerWeb.SwarmLive.FormComponent do
           params =
             case :os.type() do
               # TODO: find a better way to initialize swarm on Mac?
+              # TODO: check os of the Agent's host, not the server's host.
               {:unix, :darwin} ->
                 %{
                   listen_addr: "0.0.0.0:2377",

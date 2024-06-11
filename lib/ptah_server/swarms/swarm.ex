@@ -19,6 +19,5 @@ defmodule PtahServer.Swarms.Swarm do
     |> cast(attrs, [:name, :ext_id])
     |> validate_required([:name])
     |> maybe_put_team_id()
-    |> validate_unique([:team_id, :name])
   end
 end

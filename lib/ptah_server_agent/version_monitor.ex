@@ -56,10 +56,11 @@ defmodule PtahServerAgent.VersionMonitor do
   end
 
   defp get_latest_version(client) do
+    # TODO: replace Tesla with Finch
     {:ok, latest} =
       Tesla.get(client, "https://api.github.com/repos/ptah-sh/ptah_agent/releases/latest")
 
-    if Enum.empty?(latest.body["assets"]) do
+    if latest.body == nil or Enum.empty?(latest.body["assets"]) do
       nil
     else
       latest.body["tag_name"]

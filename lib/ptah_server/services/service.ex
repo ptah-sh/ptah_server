@@ -82,11 +82,11 @@ defmodule PtahServer.Services.Service do
           embeds_many :mounts, MountSpec, on_replace: :delete do
             def changeset(mount_spec, attrs) do
               mount_spec
-              |> cast(attrs, [:source, :target])
-              |> validate_required([:source, :target])
+              |> cast(attrs, [:name, :target])
+              |> validate_required([:name, :target])
             end
 
-            field :source, :string
+            field :name, :string
             field :target, :string
           end
         end

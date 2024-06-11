@@ -9,7 +9,6 @@ defmodule PtahServer.Servers.Server do
     field :last_seen_at, :naive_datetime
     field :role, Ecto.Enum, values: [:manager, :worker]
     field :ext_id, :string
-    field :mounts_root, :string
 
     belongs_to :team, PtahServer.Teams.Team
     belongs_to :swarm, PtahServer.Swarms.Swarm
@@ -42,13 +41,11 @@ defmodule PtahServer.Servers.Server do
   @doc false
   def changeset(server, attrs) do
     server
-    |> cast(attrs, [:name, :mounts_root])
+    |> cast(attrs, [:name])
     |> cast_embed(:networks, required: true)
     |> validate_required([:name])
     |> ensure_team_id()
     |> ensure_agent_token()
-    |> unsafe_validate_unique([:name], PtahServer.Repo)
-    |> unique_constraint([:name])
   end
 
   defp ensure_team_id(changeset) do

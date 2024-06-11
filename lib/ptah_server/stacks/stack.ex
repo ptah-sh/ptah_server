@@ -29,6 +29,6 @@ defmodule PtahServer.Stacks.Stack do
       drop_param: :services_drop
     )
     |> validate_required([:swarm_id, :name, :stack_name, :stack_version])
-    |> validate_unique_in_team([:name])
+    |> maybe_put_team_id()
   end
 end

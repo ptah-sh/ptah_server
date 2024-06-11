@@ -189,7 +189,7 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
                   <.inputs_for :let={volume_spec} field={container_spec[:mounts]}>
                     <tr>
                       <td>
-                        <.input field={volume_spec[:source]} type="text" label="Source" />
+                        <.input field={volume_spec[:name]} type="text" label="Name" />
                       </td>
                       <td>
                         <.input field={volume_spec[:target]} type="text" label="Target" />
@@ -245,7 +245,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
     assign(
       socket,
       :docker_registries,
-      [{"Docker Hub", ""}] ++ Enum.map(registries, &{&1.name, &1.id})
+      [{"Docker Hub or an Anonymous one (ghcr.io, etc.)", ""}] ++
+        Enum.map(registries, &{&1.name, &1.id})
     )
   end
 end

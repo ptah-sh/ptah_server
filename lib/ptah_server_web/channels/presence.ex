@@ -7,6 +7,8 @@ defmodule PtahServerWeb.Presence do
     @type t :: map()
   end
 
+  @slug_re ~r/\W/
+
   @moduledoc """
   Provides presence tracking to channels and processes.
 
@@ -168,7 +170,7 @@ defmodule PtahServerWeb.Presence do
         Enum.map(stack.services, fn service ->
           %Cmd.CreateStack.Service{
             service_id: service.id,
-            service_spec: map_service_spec(manager, stack, service)
+            service_spec: map_service_spec(stack, service)
           }
         end)
     })
@@ -195,11 +197,11 @@ defmodule PtahServerWeb.Presence do
       docker: %Cmd.UpdateService.Docker{
         service_id: service.ext_id
       },
-      service_spec: map_service_spec(manager, service.stack, service)
+      service_spec: map_service_spec(service.stack, service)
     })
   end
 
-  defp map_service_spec(manager, stack, service) do
+  defp map_service_spec(stack, service) do
     %ServiceSpec{
       name: "#{stack.name}_#{service.service_name}",
       task_template: %ServiceSpec.TaskTemplate{
@@ -217,18 +219,14 @@ defmodule PtahServerWeb.Presence do
           mounts:
             Enum.map(service.spec.task_template.container_spec.mounts, fn mount ->
               %ServiceSpec.TaskTemplate.ContainerSpec.Mount{
-                type: "bind",
+                type: "volume",
                 source:
-                  Path.join([
-                    manager.server.mounts_root,
+                  slugify([
                     stack.name,
                     service.service_name,
-                    mount.source
+                    mount.name
                   ]),
-                target: mount.target,
-                bind_options: %ServiceSpec.TaskTemplate.ContainerSpec.Mount.BindOptions{
-                  create_mountpoint: true
-                }
+                target: mount.target
               }
             end)
         },
@@ -281,6 +279,13 @@ defmodule PtahServerWeb.Presence do
       name: config.name,
       data: data
     })
+  end
+
+  defp slugify(name) do
+    name
+    |> Enum.join("_")
+    |> String.downcase()
+    |> String.replace(@slug_re, "_")
   end
 
   defp team_topic(team_id) do

@@ -22,7 +22,6 @@ defmodule PtahServerAgent.AgentChannel do
 
       {:ok, server} =
         Servers.update_server(server, %{
-          mounts_root: payload.mounts_root,
           networks:
             payload.networks
             |> Enum.map(fn network ->
