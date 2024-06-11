@@ -22,6 +22,10 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 
+// TODO: use autoAnimate
+// https://auto-animate.formkit.com/#installation
+// import autoAnimate from "@formkit/auto-animate";
+
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");

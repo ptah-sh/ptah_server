@@ -26,9 +26,9 @@ defmodule PtahServer.Teams.Team do
   end
 
   defp ensure_api_key(changeset) do
-    if get_field(changeset, :api_key) do
-      changeset
-    else
+    api_key = get_field(changeset, :api_key)
+
+    if api_key == nil or api_key == "" do
       put_change(
         changeset,
         :api_key,
@@ -38,6 +38,8 @@ defmodule PtahServer.Teams.Team do
           get_field(changeset, :name)
         )
       )
+    else
+      changeset
     end
   end
 end

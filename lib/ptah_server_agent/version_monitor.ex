@@ -10,7 +10,7 @@ defmodule PtahServerAgent.VersionMonitor do
   @impl true
   def init(_init_args) do
     # TODO: get refresh interval from config
-    :timer.send_interval(:timer.seconds(60), :refresh)
+    :timer.send_interval(:timer.seconds(120), :refresh)
 
     {:ok,
      %{
