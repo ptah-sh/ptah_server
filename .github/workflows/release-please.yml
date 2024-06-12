@@ -91,6 +91,6 @@ jobs:
           curl -X POST \
             -H 'Content-Type: application/json' \
             -H 'Accept: application/json' \
-            -H 'X-Ptah-Token: ${{ secrets.PTAH_TOKEN }}' \
+            -H 'X-Ptah-Api-Key: ${{ secrets.PTAH_TOKEN }}' \
             -d '{"spec":{"task_template":{"container_spec":{"image":"ghcr.io/ptah-sh/ptah_server:${{ needs.release-please.outputs.tag_name }}"}}}}' \
             https://app.ptah.sh/api/v1/services/1/deploy
