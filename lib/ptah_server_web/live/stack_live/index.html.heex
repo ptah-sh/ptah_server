@@ -1,7 +1,7 @@
 <.header>
   Listing Stacks
   <:actions>
-    <.link patch={~p"/stacks/new"}>
+    <.link patch={~p"/teams/#{@current_team}/stacks/new"}>
       <.button>New Stack</.button>
     </.link>
   </:actions>
@@ -10,7 +10,7 @@
 <.table
   id="stacks"
   rows={@streams.stacks}
-  row_click={fn {_id, stack} -> JS.navigate(~p"/stacks/#{stack}") end}
+  row_click={fn {_id, stack} -> JS.navigate(~p"/teams/#{@current_team}/stacks/#{stack}") end}
 >
   <:col :let={{_id, stack}} label="Team"><%= stack.team_id %></:col>
   <:col :let={{_id, stack}} label="Name"><%= stack.name %></:col>
@@ -18,9 +18,9 @@
   <:col :let={{_id, stack}} label="Stack version"><%= stack.stack_version %></:col>
   <:action :let={{_id, stack}}>
     <div class="sr-only">
-      <.link navigate={~p"/stacks/#{stack}"}>Show</.link>
+      <.link navigate={~p"/teams/#{@current_team}/stacks/#{stack}"}>Show</.link>
     </div>
-    <.link patch={~p"/stacks/#{stack}/edit"}>Edit</.link>
+    <.link patch={~p"/teams/#{@current_team}/stacks/#{stack}/edit"}>Edit</.link>
   </:action>
   <:action :let={{id, stack}}>
     <.link
@@ -32,13 +32,18 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="stack-modal" show on_cancel={JS.patch(~p"/stacks")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="stack-modal"
+  show
+  on_cancel={JS.patch(~p"/teams/#{@current_team}/stacks")}
+>
   <.live_component
     module={PtahServerWeb.StackLive.FormComponent}
     id={@stack.id || :new}
     title={@page_title}
     action={@live_action}
     stack={@stack}
-    patch={~p"/stacks"}
+    patch={~p"/teams/#{@current_team}/stacks"}
   />
 </.modal>

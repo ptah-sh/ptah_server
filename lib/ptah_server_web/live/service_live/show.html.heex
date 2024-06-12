@@ -2,7 +2,10 @@
   Service <%= @service.id %>
   <:subtitle>This is a service record from your database.</:subtitle>
   <:actions>
-    <.link patch={~p"/services/#{@service}/show/edit"} phx-click={JS.push_focus()}>
+    <.link
+      patch={~p"/teams/#{@current_team}/services/#{@service}/show/edit"}
+      phx-click={JS.push_focus()}
+    >
       <.button>Edit service</.button>
     </.link>
   </:actions>
@@ -14,13 +17,13 @@
   <:item title="Ext"><%= @service.ext_id %></:item>
 </.list>
 
-<.back navigate={~p"/services"}>Back to services</.back>
+<.back navigate={~p"/teams/#{@current_team}/services"}>Back to services</.back>
 
 <.modal
   :if={@live_action == :edit}
   id="service-modal"
   show
-  on_cancel={JS.patch(~p"/services/#{@service}")}
+  on_cancel={JS.patch(~p"/teams/#{@current_team}/services/#{@service}")}
 >
   <.live_component
     module={PtahServerWeb.ServiceLive.FormComponent}
@@ -28,6 +31,6 @@
     title={@page_title}
     action={@live_action}
     service={@service}
-    patch={~p"/services/#{@service}"}
+    patch={~p"/teams/#{@current_team}/services/#{@service}"}
   />
 </.modal>

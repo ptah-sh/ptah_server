@@ -1,7 +1,7 @@
 <.header>
   Listing Docker registries
   <:actions>
-    <.link patch={~p"/docker_registries/new"}>
+    <.link patch={~p"/teams/#{@current_team}/docker_registries/new"}>
       <.button>New Docker registry</.button>
     </.link>
   </:actions>
@@ -10,14 +10,22 @@
 <.table
   id="docker_registries"
   rows={@streams.docker_registries}
-  row_click={fn {_id, docker_registry} -> JS.navigate(~p"/docker_registries/#{docker_registry}") end}
+  row_click={
+    fn {_id, docker_registry} ->
+      JS.navigate(~p"/teams/#{@current_team}/docker_registries/#{docker_registry}")
+    end
+  }
 >
   <:col :let={{_id, docker_registry}} label="Name"><%= docker_registry.name %></:col>
   <:action :let={{_id, docker_registry}}>
     <div class="sr-only">
-      <.link navigate={~p"/docker_registries/#{docker_registry}"}>Show</.link>
+      <.link navigate={~p"/teams/#{@current_team}/docker_registries/#{docker_registry}"}>
+        Show
+      </.link>
     </div>
-    <.link patch={~p"/docker_registries/#{docker_registry}/edit"}>Edit</.link>
+    <.link patch={~p"/teams/#{@current_team}/docker_registries/#{docker_registry}/edit"}>
+      Edit
+    </.link>
   </:action>
   <:action :let={{id, docker_registry}}>
     <.link
@@ -29,13 +37,18 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="docker_registry-modal" show on_cancel={JS.patch(~p"/docker_registries")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="docker_registry-modal"
+  show
+  on_cancel={JS.patch(~p"/teams/#{@current_team}/docker_registries")}
+>
   <.live_component
     module={PtahServerWeb.DockerRegistryLive.FormComponent}
     id={@docker_registry.id || :new}
     title={@page_title}
     action={@live_action}
     docker_registry={@docker_registry}
-    patch={~p"/docker_registries"}
+    patch={~p"/teams/#{@current_team}/docker_registries"}
   />
 </.modal>
