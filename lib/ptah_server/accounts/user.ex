@@ -1,4 +1,5 @@
 defmodule PtahServer.Accounts.User do
+  require Logger
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -41,7 +42,7 @@ defmodule PtahServer.Accounts.User do
     |> cast(attrs, [:email, :password])
     |> validate_email(opts)
     |> validate_password(opts)
-    |> maybe_put_new_team(user)
+    |> put_change(:teams, [PtahServer.Teams.Team.get_default_team_attrs(attrs["email"])])
   end
 
   defp validate_email(changeset, opts) do
@@ -61,14 +62,6 @@ defmodule PtahServer.Accounts.User do
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
-  end
-
-  defp maybe_put_new_team(changeset, user) do
-    if user.id == nil do
-      put_change(changeset, :teams, [PtahServer.Teams.Team.get_default_team()])
-    else
-      changeset
-    end
   end
 
   defp maybe_hash_password(changeset, opts) do

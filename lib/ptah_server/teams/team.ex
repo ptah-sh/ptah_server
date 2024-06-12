@@ -18,28 +18,17 @@ defmodule PtahServer.Teams.Team do
     team
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> ensure_api_key()
   end
 
-  def get_default_team() do
-    %PtahServer.Teams.Team{name: "My Team"}
-  end
-
-  defp ensure_api_key(changeset) do
-    api_key = get_field(changeset, :api_key)
-
-    if api_key == nil or api_key == "" do
-      put_change(
-        changeset,
-        :api_key,
+  def get_default_team_attrs(email) do
+    %{
+      name: "My Team",
+      api_key:
         Phoenix.Token.sign(
           PtahServerWeb.Endpoint,
           "team_api_key",
-          get_field(changeset, :name)
+          email
         )
-      )
-    else
-      changeset
-    end
+    }
   end
 end
