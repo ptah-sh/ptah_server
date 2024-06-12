@@ -4,6 +4,8 @@ defmodule PtahServer.Swarms do
   """
 
   import Ecto.Query, warn: false
+  require Logger
+  alias PtahServerWeb.Presence
   alias PtahServer.Repo
 
   alias PtahServer.Swarms.Swarm
@@ -35,7 +37,7 @@ defmodule PtahServer.Swarms do
       ** (Ecto.NoResultsError)
 
   """
-  def get_swarm!(id), do: Repo.get!(Swarm, id)
+  def get_swarm!(id, opts \\ []), do: Repo.get!(Swarm, id, opts)
 
   @doc """
   Creates a swarm.
@@ -111,9 +113,14 @@ defmodule PtahServer.Swarms do
         end)
       end)
       |> List.flatten()
-      |> Enum.reduce(%{}, &Map.merge/2)
+      |> Enum.reduce(%{}, fn caddy, acc ->
+        Map.to_list(caddy)
+        |> Enum.reduce(acc, fn {k, v}, acc ->
+          Map.update(acc, k, v, fn current -> current ++ v end)
+        end)
+      end)
 
-    %{
+    config = %{
       "apps" => %{
         "http" => %{
           "servers" =>
@@ -127,6 +134,8 @@ defmodule PtahServer.Swarms do
         }
       }
     }
+
+    Presence.load_caddy(swarm, config)
   end
 
   defp map_service_to_caddy(service, stack_name) do
@@ -157,7 +166,7 @@ defmodule PtahServer.Swarms do
                     "handler" => "reverse_proxy",
                     "upstreams" => [
                       %{
-                        "dial" => "#{service.service_name}.#{stack_name}:#{caddy.target_port}"
+                        "dial" => "#{service.name}.#{stack_name}:#{caddy.target_port}"
                       }
                     ]
                   }

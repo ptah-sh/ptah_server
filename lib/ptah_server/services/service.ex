@@ -17,8 +17,8 @@ defmodule PtahServer.Services.Service do
       def changeset(service_spec, attrs) do
         service_spec
         |> cast(attrs, [:bind_volumes, :placement_server_id])
-        |> cast_embed(:endpoint_spec)
-        |> cast_embed(:task_template)
+        |> cast_embed(:endpoint_spec, required: true)
+        |> cast_embed(:task_template, required: true)
         |> validate_required_server_if_volumes_bound()
       end
 
@@ -37,7 +37,7 @@ defmodule PtahServer.Services.Service do
         def changeset(task_template, attrs) do
           task_template
           |> cast(attrs, [])
-          |> cast_embed(:container_spec)
+          |> cast_embed(:container_spec, required: true)
 
           # |> cast_embed(:placement)
           # |> cast_embed(:networks)
@@ -134,9 +134,11 @@ defmodule PtahServer.Services.Service do
   def changeset(service, attrs) do
     service
     |> cast(attrs, [:name, :service_name, :ext_id])
-    |> cast_embed(:spec, with: &PtahServer.Services.Service.ServiceSpec.changeset/2)
-    # |> cast_embed(:published_ports, with: &published_port_changeset/2)
-    |> validate_required([:name, :service_name])
+    |> cast_embed(:spec,
+      with: &PtahServer.Services.Service.ServiceSpec.changeset/2,
+      required: true
+    )
+    |> validate_required([:name])
     |> maybe_put_team_id()
   end
 end

@@ -1,5 +1,6 @@
 defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
   require Logger
+  alias Phoenix.HTML.Form
   alias PtahServer.DockerRegistries
   alias PtahServer.Servers
   use PtahServerWeb, :live_component
@@ -19,14 +20,21 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
     ~H"""
     <div>
       <h3 class="text-lg border-t-2">
-        Service: <.input field={@field[:name]} type="text" label="Name" />
+        Service: <.input field={@field[:name]} type="text" label="Name" disabled={@action != :new} />
+
+        <small :if={@action != :new}>
+          Services can not be renamed.
+        </small>
+
+        <br />
 
         <.input field={@field[:service_name]} type="hidden" />
 
         <small>
           Your service will be accessible on the Swarm cluster via the following endpoint:
         </small>
-        <small><%= @field[:name].value %>.%stackname%</small>
+        <br />
+        <small><%= @field[:name].value %>.<%= @stack_name %></small>
 
         <p class="text-sm italic">
           <%!-- <%= @stack_schema["description"] %> --%>
@@ -162,13 +170,16 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
 
         <.input type="checkbox" field={spec_field[:bind_volumes]} label="Bind Volumes?" />
 
-        <div :if={spec_field[:bind_volumes].value}>
+        <div :if={Form.normalize_value("checkbox", spec_field[:bind_volumes].value)}>
           <.input
             type="select"
             field={spec_field[:placement_server_id]}
             options={@servers}
             prompt="Select a Server"
+            disabled={spec_field[:placement_server_id].value && @action != :new}
           />
+
+          <small :if={@action != :new}>Placement can not be changed.</small>
 
           <div>
             Volumes
@@ -228,13 +239,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
   end
 
   defp assign_servers(socket) do
-    # FIXME: get_field(spec).bind_volumes ??
     servers =
-      if socket.assigns.field.params["spec"]["bind_volumes"] do
-        Enum.map(Servers.list_by_swarm_id(socket.assigns.swarm_id), &{&1.name, &1.id})
-      else
-        []
-      end
+      Enum.map(Servers.list_by_swarm_id(socket.assigns.swarm_id), &{&1.name, &1.id})
 
     assign(socket, :servers, servers)
   end

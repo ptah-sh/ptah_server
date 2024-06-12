@@ -71,6 +71,16 @@ defmodule PtahServerAgent.AgentChannel do
   end
 
   @impl PtahProto
+  def handle_packet(%Event.ServiceUpdated{} = _payload, socket) do
+    {:noreply, socket}
+  end
+
+  @impl PtahProto
+  def handle_packet(%Event.ServiceDeleted{} = _payload, socket) do
+    {:noreply, socket}
+  end
+
+  @impl PtahProto
   def handle_packet(%Event.SwarmCreated{} = packet, socket) do
     swarm = Repo.get_by(Swarm, id: packet.swarm_id)
 

@@ -20,6 +20,13 @@ defmodule PtahServer.Stacks.Stack do
 
   @doc false
   def changeset(stack, attrs) do
+    attrs =
+      if stack.id do
+        Map.delete(attrs, "swarm_id")
+      else
+        attrs
+      end
+
     stack
     |> cast(attrs, [:swarm_id, :name, :stack_name, :stack_version])
     |> cast_assoc(:services,

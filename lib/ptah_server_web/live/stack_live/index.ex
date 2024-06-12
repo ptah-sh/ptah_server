@@ -1,4 +1,5 @@
 defmodule PtahServerWeb.StackLive.Index do
+  alias PtahServer.Repo
   use PtahServerWeb, :live_view
 
   alias PtahServer.Stacks
@@ -17,7 +18,7 @@ defmodule PtahServerWeb.StackLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Stack")
-    |> assign(:stack, Stacks.get_stack!(id))
+    |> assign(:stack, Stacks.get_stack!(id) |> Repo.preload(:services))
   end
 
   defp apply_action(socket, :new, _params) do

@@ -161,30 +161,38 @@ defmodule PtahServerWeb.Presence do
     manager
   end
 
-  def stack_create(stack) do
-    manager = get_swarm_manager!(Repo.preload(stack, :swarm).swarm)
+  def load_caddy(swarm, config) do
+    manager = get_swarm_manager!(swarm)
 
-    AgentChannel.push(manager.socket, %Cmd.CreateStack{
-      name: stack.name,
-      services:
-        Enum.map(stack.services, fn service ->
-          %Cmd.CreateStack.Service{
-            service_id: service.id,
-            service_spec: map_service_spec(stack, service)
-          }
-        end)
+    AgentChannel.push(manager.socket, %Cmd.LoadCaddyConfig{
+      config: config
     })
+  end
+
+  def stack_create(stack) do
+    for service <- stack.services do
+      service_create(service)
+    end
 
     # TODO: remove this dependency. It is here just to record a demo. Fails when installing ptah-swarm itself,
     #   as there's no Caddy yet.
     #   This case should be handled elsewhere
     if stack.name != "ptah-swarm" do
-      AgentChannel.push(manager.socket, %Cmd.LoadCaddyConfig{
-        config: Swarms.rebuild_caddy(Repo.preload(manager.server, :swarm).swarm)
-      })
+      Swarms.rebuild_caddy(Repo.preload(stack, :swarm).swarm)
     end
 
     :ok
+  end
+
+  def service_create(service) do
+    service = Repo.preload(service, :stack)
+
+    manager = get_swarm_manager!(Repo.preload(service.stack, :swarm).swarm)
+
+    AgentChannel.push(manager.socket, %Cmd.CreateService{
+      service_id: service.id,
+      service_spec: map_service_spec(service.stack, service)
+    })
   end
 
   def service_update(service) do
@@ -201,14 +209,25 @@ defmodule PtahServerWeb.Presence do
     })
   end
 
+  def service_delete(swarm, service) do
+    manager = get_swarm_manager!(swarm)
+
+    AgentChannel.push(manager.socket, %Cmd.DeleteService{
+      service_id: service.id,
+      docker: %Cmd.DeleteService.Docker{
+        service_id: service.ext_id
+      }
+    })
+  end
+
   defp map_service_spec(stack, service) do
     %ServiceSpec{
-      name: "#{stack.name}_#{service.service_name}",
+      name: "#{stack.name}_#{service.name}",
       task_template: %ServiceSpec.TaskTemplate{
         container_spec: %ServiceSpec.TaskTemplate.ContainerSpec{
           name: service.name,
           image: service.spec.task_template.container_spec.image,
-          hostname: "#{service.service_name}.#{stack.name}",
+          hostname: "#{service.name}.#{stack.name}",
           env:
             Enum.map(service.spec.task_template.container_spec.env, fn env ->
               %ServiceSpec.TaskTemplate.ContainerSpec.Env{
@@ -223,7 +242,7 @@ defmodule PtahServerWeb.Presence do
                 source:
                   slugify([
                     stack.name,
-                    service.service_name,
+                    service.name,
                     mount.name
                   ]),
                 target: mount.target

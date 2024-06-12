@@ -1,4 +1,5 @@
 defmodule PtahServerWeb.StackLive.Show do
+  alias PtahServer.Repo
   use PtahServerWeb, :live_view
 
   alias PtahServer.Stacks
@@ -13,7 +14,7 @@ defmodule PtahServerWeb.StackLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:stack, Stacks.get_stack!(id))}
+     |> assign(:stack, Stacks.get_stack!(id) |> Repo.preload(:services))}
   end
 
   defp page_title(:show), do: "Show Stack"

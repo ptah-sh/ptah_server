@@ -48,7 +48,9 @@ defmodule PtahServerWeb.StackLive.FormComponent do
           options={@swarms}
           phx-target={@myself}
           phx-change="change_swarm"
+          disabled={@stack.id}
         />
+        <small :if={@stack.id}>Existing stacks can not be moved between Swarms</small>
 
         <.input
           type="select"
@@ -62,7 +64,9 @@ defmodule PtahServerWeb.StackLive.FormComponent do
         <%= if @form[:stack_name].value && @form[:stack_name].value != "" do %>
           <.input field={@form[:stack_version]} type="hidden" />
 
-          <.input field={@form[:name]} type="text" label="Name" />
+          <.input field={@form[:name]} type="text" label="Name" disabled={@action != :new} />
+
+          <small :if={@action != :new}>Stacks can not be renamed.</small>
 
           <h2 class="text-xl font-semibold">
             <%!-- <%= @stack_schema["name"] %>@<%= @stack_schema["version"] %> --%>
@@ -99,7 +103,15 @@ defmodule PtahServerWeb.StackLive.FormComponent do
               module={ServiceComponent}
               id={service.id}
               field={service}
+              action={
+                if service.data.id == nil do
+                  :new
+                else
+                  :edit
+                end
+              }
               swarm_id={@form[:swarm_id].value}
+              stack_name={@form[:name].value}
             />
           </.inputs_for>
         <% end %>
@@ -213,8 +225,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
   end
 
   defp save_stack(socket, :new, stack_params) do
-    # stack_params = assign_stack_params(stack_params, socket)
-
     case Stacks.create_stack(stack_params) do
       {:ok, stack} ->
         # TODO: rollback insert on stack_create failure
@@ -225,6 +235,21 @@ defmodule PtahServerWeb.StackLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Stack created successfully")
+         |> push_patch(to: socket.assigns.patch)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign_form(socket, changeset)}
+    end
+  end
+
+  defp save_stack(socket, :edit, stack_params) do
+    case Stacks.update_stack(socket.assigns.stack, stack_params) do
+      {:ok, stack} ->
+        notify_parent({:saved, stack})
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Stack updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
