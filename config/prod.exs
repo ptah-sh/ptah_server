@@ -9,6 +9,8 @@ config :ptah_server, PtahServerWeb.Endpoint,
   http: [ip: {0, 0, 0, 0}, port: 4000],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :ptah_server, :analytics, enabled: true
+
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: PtahServer.Finch
 

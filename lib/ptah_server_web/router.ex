@@ -11,6 +11,7 @@ defmodule PtahServerWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
+    plug :analytics
   end
 
   pipeline :api do
@@ -143,5 +144,13 @@ defmodule PtahServerWeb.Router do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
+  end
+
+  defp analytics(conn, _otps) do
+    assign(
+      conn,
+      :analytics,
+      Keyword.fetch!(Application.get_env(:ptah_server, :analytics), :enabled)
+    )
   end
 end

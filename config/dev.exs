@@ -1,5 +1,7 @@
 import Config
 
+config :ptah_server, :analytics, enabled: false
+
 # Configure your database
 config :ptah_server, PtahServer.Repo,
   username: "postgres",
