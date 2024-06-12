@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/ptah-sh/ptah_server/compare/v1.4.1...v1.4.2) (2024-06-12)
+
+
+### Bug Fixes
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) update service id ([d6e771b](https://github.com/ptah-sh/ptah_server/commit/d6e771b44833db49cc111d6436c0fb479f006251))
+
 ## [1.4.1](https://github.com/ptah-sh/ptah_server/compare/v1.4.0...v1.4.1) (2024-06-12)
 
 
