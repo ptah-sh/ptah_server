@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/ptah-sh/ptah_server/compare/v1.4.0...v1.4.1) (2024-06-12)
+
+
+### Bug Fixes
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) correct api key header name ([971d2d8](https://github.com/ptah-sh/ptah_server/commit/971d2d8f68ed86c86def962b88d399d2ca1c4576))
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) remove required validation from networks ([f7d0aeb](https://github.com/ptah-sh/ptah_server/commit/f7d0aeb0a8ea0a1eabb2104c87b774ffeb58b531))
+
 ## [1.4.0](https://github.com/ptah-sh/ptah_server/compare/v1.3.0...v1.4.0) (2024-06-12)
 
 
