@@ -42,7 +42,7 @@ defmodule PtahServer.Servers.Server do
   def changeset(server, attrs) do
     server
     |> cast(attrs, [:name])
-    |> cast_embed(:networks, required: true)
+    |> cast_embed(:networks)
     |> validate_required([:name])
     |> ensure_team_id()
     |> ensure_agent_token()
