@@ -6,8 +6,6 @@ defmodule PtahServerWeb.UserAuth do
 
   require Logger
   alias PtahServer.Teams.Team
-  alias PtahServer.Teams.TeamUser
-  alias PtahServer.Repo
   alias PtahServer.Accounts
 
   # Make the remember me cookie valid for 60 days.
@@ -38,17 +36,6 @@ defmodule PtahServerWeb.UserAuth do
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
-  end
-
-  # TODO: read team ID from the URL in the future - e.g. /teams/:team_id/servers
-  defp put_current_team_id(conn) do
-    if conn.assigns.current_user do
-      team = Repo.get_by!(TeamUser, [user_id: conn.assigns.current_user.id], skip_team_id: true)
-
-      Repo.put_team_id(team.team_id)
-    end
-
-    conn
   end
 
   defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}) do
@@ -108,6 +95,7 @@ defmodule PtahServerWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
+
     assign(conn, :current_user, user)
   end
 
@@ -223,7 +211,6 @@ defmodule PtahServerWeb.UserAuth do
         Accounts.get_user_by_session_token(user_token)
       end
     end)
-    |> put_current_team_id()
   end
 
   @doc """

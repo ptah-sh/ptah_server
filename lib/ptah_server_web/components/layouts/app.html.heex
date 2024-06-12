@@ -7,25 +7,27 @@
       <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
         v<%= Application.spec(:phoenix, :vsn) %>
       </p>
-      <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-        <!-- highlight active link https://stackoverflow.com/a/31572944 -->
+      <%= if @current_team do %>
+        <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
+          <!-- highlight active link https://stackoverflow.com/a/31572944 -->
         <!-- https://fly.io/phoenix-files/liveview-active-nav/ -->
-        <a href="/servers" class="hover:text-zinc-700">
-          Servers
-        </a>
-        <a href="/swarms" class="hover:text-zinc-700">
-          Swarms
-        </a>
-        <a href="/stacks" class="hover:text-zinc-700">
-          Stacks
-        </a>
-        <a href="/services" class="hover:text-zinc-700">
-          Services
-        </a>
-        <a href="/docker_registries" class="hover:text-zinc-700">
-          Docker Registries
-        </a>
-      </div>
+          <a href={~p"/teams/#{@current_team}/servers"} class="hover:text-zinc-700">
+            Servers
+          </a>
+          <a href={~p"/teams/#{@current_team}/swarms"} class="hover:text-zinc-700">
+            Swarms
+          </a>
+          <a href={~p"/teams/#{@current_team}/stacks"} class="hover:text-zinc-700">
+            Stacks
+          </a>
+          <a href={~p"/teams/#{@current_team}/services"} class="hover:text-zinc-700">
+            Services
+          </a>
+          <a href={~p"/teams/#{@current_team}/docker_registries"} class="hover:text-zinc-700">
+            Docker Registries
+          </a>
+        </div>
+      <% end %>
     </div>
     <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
       <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
