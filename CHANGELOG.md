@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/ptah-sh/ptah_server/compare/v1.4.2...v1.5.0) (2024-06-12)
+
+
+### Features
+
+* [#40](https://github.com/ptah-sh/ptah_server/issues/40) allow to update and delete stacks ([d1cad96](https://github.com/ptah-sh/ptah_server/commit/d1cad9691d2cfba8a23fdb0db53d33705d5a5204))
+
 ## [1.4.2](https://github.com/ptah-sh/ptah_server/compare/v1.4.1...v1.4.2) (2024-06-12)
 
 
