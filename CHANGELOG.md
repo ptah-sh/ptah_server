@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.0](https://github.com/ptah-sh/ptah_server/compare/v1.3.0...v1.4.0) (2024-06-12)
+
+
+### Features
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) add ptah deployment trigger ([f88fe93](https://github.com/ptah-sh/ptah_server/commit/f88fe93aceff69b38aa50b0806caacca424f44a5))
+
+
+### Bug Fixes
+
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) team creation ([e9fbc92](https://github.com/ptah-sh/ptah_server/commit/e9fbc926632661c4dd5798f553939de8a631ed24))
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) team's api_key assignment ([e561c02](https://github.com/ptah-sh/ptah_server/commit/e561c023767efad248684c17ae35f6a5476acb23))
+* [#11](https://github.com/ptah-sh/ptah_server/issues/11) trigger deployment only after docker image has been pushed ([46c78d8](https://github.com/ptah-sh/ptah_server/commit/46c78d849fa5289010b99177ab18210ca9e9f626))
+* [#44](https://github.com/ptah-sh/ptah_server/issues/44) enable web analytics ([192d142](https://github.com/ptah-sh/ptah_server/commit/192d14249ec3ad16d162da98688d33dd1b615997))
+
 ## [1.3.0](https://github.com/ptah-sh/ptah_server/compare/v1.2.0...v1.3.0) (2024-06-11)
 
 
