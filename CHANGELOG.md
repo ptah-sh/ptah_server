@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.7.0](https://github.com/ptah-sh/ptah_server/compare/v1.6.2...v1.7.0) (2024-06-13)
+
+
+### Features
+
+* [#56](https://github.com/ptah-sh/ptah_server/issues/56) add rabbitmq stack ([bb567bf](https://github.com/ptah-sh/ptah_server/commit/bb567bf670623f61085ded34c11a4561a01ce5bd))
+
+
+### Bug Fixes
+
+* [#20](https://github.com/ptah-sh/ptah_server/issues/20) send auth data ([5a5c3cf](https://github.com/ptah-sh/ptah_server/commit/5a5c3cf7d519a692450a5179ba9d8d7527d097ba))
+* [#58](https://github.com/ptah-sh/ptah_server/issues/58) docker registry creation ([add309d](https://github.com/ptah-sh/ptah_server/commit/add309d4fff5758877052d367a83a9b208533314))
+* [#59](https://github.com/ptah-sh/ptah_server/issues/59) anonymous user crash ([1a2d541](https://github.com/ptah-sh/ptah_server/commit/1a2d5417a505dcd68a25544eb91f811d515d28b6))
+
 ## [1.6.2](https://github.com/ptah-sh/ptah_server/compare/v1.6.1...v1.6.2) (2024-06-13)
 
 
