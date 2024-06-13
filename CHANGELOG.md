@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/ptah-sh/ptah_server/compare/v1.8.0...v1.8.1) (2024-06-13)
+
+
+### Bug Fixes
+
+* [#34](https://github.com/ptah-sh/ptah_server/issues/34) bitnami data dir targets ([d942f34](https://github.com/ptah-sh/ptah_server/commit/d942f340b79b6e4c648ffc705c195fb5a79c6d03))
+
 ## [1.8.0](https://github.com/ptah-sh/ptah_server/compare/v1.7.0...v1.8.0) (2024-06-13)
 
 
