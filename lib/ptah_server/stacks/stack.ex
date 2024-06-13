@@ -28,14 +28,14 @@ defmodule PtahServer.Stacks.Stack do
       end
 
     stack
-    |> cast(attrs, [:swarm_id, :name, :stack_name, :stack_version])
+    |> cast(attrs, [:swarm_id, :name, :stack_name])
     |> cast_assoc(:services,
       required: true,
       with: &Service.changeset/2,
       sort_param: :services_sort,
       drop_param: :services_drop
     )
-    |> validate_required([:swarm_id, :name, :stack_name, :stack_version])
+    |> validate_required([:swarm_id, :name, :stack_name])
     |> maybe_put_team_id()
   end
 end

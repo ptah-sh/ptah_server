@@ -191,7 +191,10 @@ defmodule PtahServerWeb.Presence do
 
     AgentChannel.push(manager.socket, %Cmd.CreateService{
       service_id: service.id,
-      service_spec: map_service_spec(service.stack, service)
+      service_spec: map_service_spec(service.stack, service),
+      docker: %Cmd.CreateService.Docker{
+        auth_config_id: get_auth_config_id(service)
+      }
     })
   end
 
@@ -203,7 +206,8 @@ defmodule PtahServerWeb.Presence do
     AgentChannel.push(manager.socket, %Cmd.UpdateService{
       service_id: service.id,
       docker: %Cmd.UpdateService.Docker{
-        service_id: service.ext_id
+        service_id: service.ext_id,
+        auth_config_id: get_auth_config_id(service)
       },
       service_spec: map_service_spec(service.stack, service)
     })
@@ -305,6 +309,17 @@ defmodule PtahServerWeb.Presence do
     |> Enum.join("_")
     |> String.downcase()
     |> String.replace(@slug_re, "_")
+  end
+
+  defp get_auth_config_id(service) do
+    docker_registry =
+      Repo.preload(service.spec.task_template.container_spec, :docker_registry).docker_registry
+
+    if docker_registry == nil do
+      nil
+    else
+      Repo.preload(docker_registry, :config).config.ext_id
+    end
   end
 
   defp team_topic(team_id) do
