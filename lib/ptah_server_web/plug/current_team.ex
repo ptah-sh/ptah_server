@@ -74,9 +74,12 @@ defmodule PtahServerWeb.Plug.CurrentTeam do
 
     if current_user do
       team_query =
-        from t in Teams.TeamUser, where: t.user_id == ^socket.assigns.current_user.id, limit: 1
+        from t in Teams.TeamUser,
+          where: t.user_id == ^socket.assigns.current_user.id,
+          limit: 1,
+          preload: [:team]
 
-      team = Repo.one!(team_query, skip_team_id: true)
+      team = Repo.one!(team_query, skip_team_id: true).team
 
       Repo.put_team_id(team.id)
 
