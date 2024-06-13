@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/ptah-sh/ptah_server/compare/v1.11.0...v1.11.1) (2024-06-13)
+
+
+### Bug Fixes
+
+* [#36](https://github.com/ptah-sh/ptah_server/issues/36) add new env property ([61ad7f0](https://github.com/ptah-sh/ptah_server/commit/61ad7f0c1aa60d4eab1a970f5e66eaf43ee677fb))
+
 ## [1.11.0](https://github.com/ptah-sh/ptah_server/compare/v1.10.0...v1.11.0) (2024-06-13)
 
 
