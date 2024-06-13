@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/ptah-sh/ptah_server/compare/v1.5.0...v1.6.0) (2024-06-13)
+
+
+### Features
+
+* [#27](https://github.com/ptah-sh/ptah_server/issues/27) add team_id parameter into all relevant urls ([c9e6651](https://github.com/ptah-sh/ptah_server/commit/c9e6651b61435d8d62abeccbca3e30febff71e34))
+* [#27](https://github.com/ptah-sh/ptah_server/issues/27) allow to create teams ([03fb599](https://github.com/ptah-sh/ptah_server/commit/03fb59959b3ec18708502d874971755f1ba9b8df))
+
 ## [1.5.0](https://github.com/ptah-sh/ptah_server/compare/v1.4.2...v1.5.0) (2024-06-12)
 
 
