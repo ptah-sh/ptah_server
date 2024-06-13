@@ -1,0 +1,62 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "mysql",
+  "version": "0.1.0",
+  "description": "MySQL.",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "services": [
+    {
+      "name": "mysql",
+      "description": "MySQL Server.",
+      "image": "bitnami/mysql:8.4",
+      "env": [
+        {
+          "name": "MYSQL_USER",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "MYSQL_PASSWORD",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "MYSQL_DATABASE",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "MYSQL_ROOT_USER",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "MYSQL_ROOT_PASSWORD",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "MYSQL_CHARACTER_SET",
+          "value": "utf8mb4"
+        },
+        {
+          "name": "MYSQL_COLLATE",
+          "value": "utf8mb4"
+        }
+      ],
+      "ports": [
+        {
+          "name": "mysql",
+          "target": 3306,
+          "protocol": "tcp",
+          "description": "MySQL port"
+        }
+      ],
+      "mounts": [
+        {
+          "name": "data",
+          "target": "/bitnami/mysql",
+          "description": "MySQL data directory. Should not be treated as a cache."
+        }
+      ]
+    }
+  ]
+}
