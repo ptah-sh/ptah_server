@@ -22,7 +22,7 @@
       "mounts": [
         {
           "name": "data",
-          "target": "/bitnami/redis/data",
+          "target": "/bitnami/redis",
           "description": "Redis data directory. Should not be treated as a cache."
         }
       ]
