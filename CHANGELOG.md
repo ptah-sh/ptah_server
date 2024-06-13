@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/ptah-sh/ptah_server/compare/v1.7.0...v1.8.0) (2024-06-13)
+
+
+### Features
+
+* [#34](https://github.com/ptah-sh/ptah_server/issues/34) add redis template ([606d6c8](https://github.com/ptah-sh/ptah_server/commit/606d6c890b5468a13a3b14ed083ddbe76ebdd4e5))
+
 ## [1.7.0](https://github.com/ptah-sh/ptah_server/compare/v1.6.2...v1.7.0) (2024-06-13)
 
 
