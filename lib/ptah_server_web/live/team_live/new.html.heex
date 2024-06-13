@@ -1,0 +1,13 @@
+<.header>
+  Create a new Team
+  <:subtitle>Create your team here.</:subtitle>
+</.header>
+
+<.live_component
+  module={PtahServerWeb.TeamLive.FormComponent}
+  id="team-form"
+  title="New Team"
+  action={:new}
+  team={%PtahServer.Teams.Team{}}
+  owner={@current_user}
+/>

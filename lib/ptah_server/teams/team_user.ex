@@ -5,8 +5,11 @@ defmodule PtahServer.Teams.TeamUser do
   require Logger
 
   schema "teams_users" do
-    field :team_id, :integer
-    field :user_id, :integer
+    # field :team_id, :integer
+    # field :user_id, :integer
+
+    belongs_to :team, PtahServer.Teams.Team
+    belongs_to :user, PtahServer.Accounts.User
 
     timestamps(type: :utc_datetime)
   end

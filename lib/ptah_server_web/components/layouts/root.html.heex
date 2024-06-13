@@ -32,12 +32,22 @@
         </li>
         <li>
           <.link
-            href={~p"/teams/#{@current_team}/servers"}
+            navigate={~p"/teams/new"}
             class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
           >
-            Dashboard
+            Create Team
           </.link>
         </li>
+        <%= for team <- @user_teams do %>
+          <li>
+            <.link
+              href={~p"/teams/#{team}"}
+              class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            >
+              <%= team.name %>
+            </.link>
+          </li>
+        <% end %>
         <li>
           <.link
             href={~p"/users/settings"}
