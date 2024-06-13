@@ -102,7 +102,6 @@ defmodule PtahServerWeb.Router do
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
       live "/teams/new", TeamLive.New, :new
-      live "/teams/:id", TeamLive.Show, :show
     end
 
     live_session :require_authenticated_user,
@@ -110,6 +109,8 @@ defmodule PtahServerWeb.Router do
         {PtahServerWeb.UserAuth, :ensure_authenticated},
         {PtahServerWeb.Plug.CurrentTeam, :ensure_team_access}
       ] do
+      live "/teams/:team_id", TeamLive.Show, :show
+
       scope "/teams/:team_id" do
         live "/swarms", SwarmLive.Index, :index
         live "/swarms/new", SwarmLive.Index, :new
