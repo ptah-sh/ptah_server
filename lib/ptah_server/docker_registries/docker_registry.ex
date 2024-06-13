@@ -27,7 +27,6 @@ defmodule PtahServer.DockerRegistries.DockerRegistry do
     |> cast(attrs, [
       :team_id,
       :swarm_id,
-      :config_id,
       :name,
       :endpoint,
       :username,
@@ -35,7 +34,6 @@ defmodule PtahServer.DockerRegistries.DockerRegistry do
     ])
     |> validate_required([
       :swarm_id,
-      :config_id,
       :name,
       :endpoint,
       :username,

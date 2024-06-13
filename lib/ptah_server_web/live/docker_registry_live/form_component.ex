@@ -35,7 +35,7 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
         <.input field={@form[:swarm_id]} type="select" label="Swarm" options={@swarms} />
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:endpoint]} type="text" label="Endpoint" />
-        <small>e.x. ghcr.io</small>
+        <small>e.x. ghcr.io or registry.gitlab.com</small>
 
         <.input field={@form[:username]} type="text" label="Username" />
         <.input field={@form[:password]} type="password" label="Password" />
@@ -47,6 +47,8 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
         <:actions>
           <.button phx-disable-with="Saving...">Save Docker registry</.button>
         </:actions>
+
+        <.debug value={@form} />
       </.simple_form>
     </div>
     """
@@ -96,29 +98,18 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
   # end
 
   defp save_docker_registry(socket, :new, docker_registry_params) do
-    changeset =
-      socket.assigns.docker_registry
-      |> DockerRegistries.change_docker_registry(docker_registry_params)
+    docker_config_params = %{
+      name:
+        "registry-credentials-#{docker_registry_params["swarm_id"]}-#{docker_registry_params["name"]}",
+      swarm_id: String.to_integer(docker_registry_params["swarm_id"]),
+      team_id: Repo.get_team_id()
+    }
 
-    {docker_config, docker_registry_params} =
-      if changeset.valid? do
-        {:ok, docker_config} =
-          DockerConfigs.create_docker_config(%{
-            name:
-              "registry-credentials-#{docker_registry_params["swarm_id"]}-#{docker_registry_params["name"]}",
-            swarm_id: docker_registry_params["swarm_id"]
-          })
-
-        {docker_config, Map.put(docker_registry_params, "config_id", docker_config.id)}
-      else
-        {nil, docker_registry_params}
-      end
-
-    case DockerRegistries.create_docker_registry(docker_registry_params) do
+    case DockerRegistries.create_docker_registry(docker_registry_params, docker_config_params) do
       {:ok, docker_registry} ->
         notify_parent({:saved, docker_registry})
 
-        Presence.docker_config_create(docker_config, %{
+        Presence.docker_config_create(docker_registry.config, %{
           username: docker_registry.username,
           password: docker_registry.password,
           serveraddress: docker_registry.endpoint

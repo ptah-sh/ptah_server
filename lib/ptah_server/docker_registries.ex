@@ -53,9 +53,10 @@ defmodule PtahServer.DockerRegistries do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_docker_registry(attrs \\ %{}) do
+  def create_docker_registry(attrs \\ %{}, config_attrs \\ %{}) do
     %DockerRegistry{}
     |> DockerRegistry.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:config, config_attrs)
     |> Repo.insert()
   end
 
