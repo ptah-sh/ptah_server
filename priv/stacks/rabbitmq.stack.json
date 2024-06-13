@@ -24,10 +24,6 @@
         {
           "name": "RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS",
           "value": "true"
-        },
-        {
-          "name": "RABBITMQ_VHOSTS",
-          "value": "/prod /stage"
         }
       ],
       "ports": [

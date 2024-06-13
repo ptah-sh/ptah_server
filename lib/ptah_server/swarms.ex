@@ -168,7 +168,8 @@ defmodule PtahServer.Swarms do
                       %{
                         "dial" => "#{service.name}.#{stack_name}:#{caddy.target_port}"
                       }
-                    ]
+                    ],
+                    "headers" => get_headers_for_port(caddy.published_port)
                   }
                 ]
               }
@@ -182,7 +183,7 @@ defmodule PtahServer.Swarms do
     Enum.sort_by(routes, &get_route_weight/1, :desc)
   end
 
-  def get_route_weight(route) do
+  defp get_route_weight(route) do
     segments =
       Enum.at(route["match"], 0)["path"]
       |> Enum.at(0)
@@ -194,5 +195,21 @@ defmodule PtahServer.Swarms do
       # Wildcards count, (N * -1) to sort in descending order
       (length(segments) - 1) * -1
     }
+  end
+
+  defp get_headers_for_port(443) do
+    %{
+      "request" => %{
+        "set" => %{
+          "x-forwarded-proto" => ["https"],
+          "x-forwarded-schema" => ["https"],
+          "x-forwarded-port" => ["443"]
+        }
+      }
+    }
+  end
+
+  defp get_headers_for_port(_port) do
+    %{}
   end
 end
