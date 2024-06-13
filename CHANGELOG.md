@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/ptah-sh/ptah_server/compare/v1.10.0...v1.11.0) (2024-06-13)
+
+
+### Features
+
+* [#36](https://github.com/ptah-sh/ptah_server/issues/36) add mysql stack template ([afb435b](https://github.com/ptah-sh/ptah_server/commit/afb435bd0fef2d1b8a29665bcac3aad2797b8b3e))
+
 ## [1.10.0](https://github.com/ptah-sh/ptah_server/compare/v1.9.0...v1.10.0) (2024-06-13)
 
 
