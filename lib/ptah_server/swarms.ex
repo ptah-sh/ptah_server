@@ -128,7 +128,7 @@ defmodule PtahServer.Swarms do
             |> Enum.reduce(%{}, fn port, acc ->
               Map.put(acc, "listen_#{port}", %{
                 "listen" => ["0.0.0.0:#{port}"],
-                "routes" => servers[port]
+                "routes" => sort_caddy_routes(servers[port])
               })
             end)
         }
@@ -176,5 +176,23 @@ defmodule PtahServer.Swarms do
         )
       end)
     end
+  end
+
+  defp sort_caddy_routes(routes) do
+    Enum.sort_by(routes, &get_route_weight/1, :desc)
+  end
+
+  def get_route_weight(route) do
+    segments =
+      Enum.at(route["match"], 0)["path"]
+      |> Enum.at(0)
+      |> String.split("*")
+
+    {
+      # Specificality
+      Enum.join(segments, "") |> String.length(),
+      # Wildcards count, (N * -1) to sort in descending order
+      (length(segments) - 1) * -1
+    }
   end
 end
