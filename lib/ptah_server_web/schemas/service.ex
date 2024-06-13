@@ -20,6 +20,21 @@ defmodule PtahServerWeb.Schemas.Service do
                   properties: %{
                     image: %Schema{
                       type: :string
+                    },
+                    env: %Schema{
+                      type: :array,
+                      items: %Schema{
+                        type: :object,
+                        properties: %{
+                          name: %Schema{
+                            type: :string
+                          },
+                          value: %Schema{
+                            type: :string
+                          }
+                        },
+                        required: [:name, :value]
+                      }
                     }
                   },
                   required: [:image]

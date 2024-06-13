@@ -1,6 +1,5 @@
 defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
   alias PtahServerWeb.Presence
-  alias PtahServer.DockerConfigs
   alias PtahServer.Swarms.Swarm
   alias PtahServer.Repo
   use PtahServerWeb, :live_component

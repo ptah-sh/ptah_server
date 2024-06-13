@@ -33,13 +33,16 @@ defmodule PtahServerWeb.ServiceDeployController do
     json(conn, %{})
   end
 
-  # _spec is unused as for now. In the future, we should update maps and concatenate lists with existing data.
-  def merge_spec(%Service.ServiceSpec{} = _spec, params) do
+  def merge_spec(%Service.ServiceSpec{} = spec, params) do
     %{
       "spec" => %{
         "task_template" => %{
           "container_spec" => %{
-            "image" => params.task_template.container_spec.image
+            "image" => params.task_template.container_spec.image,
+            # TODO: filter out duplicated env?
+            "env" =>
+              Enum.map(spec.task_template.container_spec.env, &Map.from_struct/1) ++
+                (params.task_template.container_spec.env || [])
           }
         }
       }
