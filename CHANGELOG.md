@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/ptah-sh/ptah_server/compare/v1.9.0...v1.10.0) (2024-06-13)
+
+
+### Features
+
+* [#63](https://github.com/ptah-sh/ptah_server/issues/63) allow to add env variables at deploy stage ([ce95ff4](https://github.com/ptah-sh/ptah_server/commit/ce95ff4b1daa65a5e5162878019d930a48f56a3a))
+
 ## [1.9.0](https://github.com/ptah-sh/ptah_server/compare/v1.8.1...v1.9.0) (2024-06-13)
 
 
