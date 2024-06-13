@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "redis",
+  "version": "0.1.0",
+  "description": "Redis.",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "services": [
+    {
+      "name": "redis",
+      "description": "Redis Server.",
+      "image": "bitnami/redis:7.2",
+      "env": [
+        {
+          "name": "REDIS_PASSWORD",
+          "value": "ptah_sh"
+        }
+      ],
+      "ports": [],
+      "mounts": [
+        {
+          "name": "data",
+          "target": "/bitnami/redis/data",
+          "description": "Redis data directory. Should not be treated as a cache."
+        }
+      ]
+    }
+  ]
+}

@@ -47,8 +47,6 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
         <:actions>
           <.button phx-disable-with="Saving...">Save Docker registry</.button>
         </:actions>
-
-        <.debug value={@form} />
       </.simple_form>
     </div>
     """

@@ -41,7 +41,7 @@
       "mounts": [
         {
           "name": "data",
-          "target": "/bitnami/rabbitmq",
+          "target": "/bitnami/rabbitmq/data",
           "description": "RabbitMQ data directory. Should not be treated as a cache."
         }
       ]

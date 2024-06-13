@@ -116,8 +116,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
           </.inputs_for>
         <% end %>
 
-        <.debug value={@form} />
-
         <:actions>
           <.button phx-disable-with="Saving...">Deploy Stack</.button>
         </:actions>
