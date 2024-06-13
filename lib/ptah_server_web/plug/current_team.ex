@@ -64,9 +64,15 @@ defmodule PtahServerWeb.Plug.CurrentTeam do
   end
 
   def fetch_default_team(conn, _opts) do
-    conn
-    |> assign(:current_team, get_default_team(conn))
-    |> assign(:user_teams, Teams.list_by_user_id(conn.assigns.current_user.id))
+    if conn.assigns.current_user do
+      conn
+      |> assign(:current_team, get_default_team(conn))
+      |> assign(:user_teams, Teams.list_by_user_id(conn.assigns.current_user.id))
+    else
+      conn
+      |> assign(:current_team, nil)
+      |> assign(:user_teams, nil)
+    end
   end
 
   defp get_default_team(socket) do
