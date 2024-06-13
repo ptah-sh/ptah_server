@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.1](https://github.com/ptah-sh/ptah_server/compare/v1.6.0...v1.6.1) (2024-06-13)
+
+
+### Bug Fixes
+
+* [#27](https://github.com/ptah-sh/ptah_server/issues/27) improve team-based navigation ([d6ec9ae](https://github.com/ptah-sh/ptah_server/commit/d6ec9ae0e855e024b9f7e2159d10d0ca9be1a6b3))
+* [#27](https://github.com/ptah-sh/ptah_server/issues/27) provide correct default team id ([7d7cf3a](https://github.com/ptah-sh/ptah_server/commit/7d7cf3a393c5822125a7cf2dcb56ce038271fc49))
+* [#27](https://github.com/ptah-sh/ptah_server/issues/27) redirect to the team page ([1122120](https://github.com/ptah-sh/ptah_server/commit/1122120d0a34b799e964e31a90a99ac691e57aa2))
+
 ## [1.6.0](https://github.com/ptah-sh/ptah_server/compare/v1.5.0...v1.6.0) (2024-06-13)
 
 
