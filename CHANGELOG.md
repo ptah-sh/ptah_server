@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/ptah-sh/ptah_server/compare/v1.8.1...v1.9.0) (2024-06-13)
+
+
+### Features
+
+* [#63](https://github.com/ptah-sh/ptah_server/issues/63) add forwarded-proto headers ([3ba077a](https://github.com/ptah-sh/ptah_server/commit/3ba077a9ab49835836288777e94a23d50c060e2a))
+
 ## [1.8.1](https://github.com/ptah-sh/ptah_server/compare/v1.8.0...v1.8.1) (2024-06-13)
 
 
