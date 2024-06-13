@@ -6,8 +6,8 @@ defmodule PtahServerWeb.Plug.CurrentTeam do
   alias PtahServer.Repo
   require Logger
 
-  # import Plug.Conn
-  import Phoenix.Controller
+  import Plug.Conn
+  # import Phoenix.Controller
   import Ecto.Query
 
   def on_mount(:assign_nil_team, _params, _session, socket) do
@@ -44,6 +44,14 @@ defmodule PtahServerWeb.Plug.CurrentTeam do
     if assigned_to_team do
       Repo.put_team_id(team.id)
 
+      socket =
+        socket
+        |> Phoenix.Component.assign(:current_team, team)
+        |> Phoenix.Component.assign(
+          :user_teams,
+          Teams.list_by_user_id(socket.assigns.current_user.id)
+        )
+
       {:cont, Phoenix.Component.assign(socket, :current_team, team)}
     else
       socket =
@@ -56,14 +64,17 @@ defmodule PtahServerWeb.Plug.CurrentTeam do
   end
 
   def fetch_default_team(conn, _opts) do
-    Plug.Conn.assign(conn, :current_team, get_default_team(conn))
+    conn
+    |> assign(:current_team, get_default_team(conn))
+    |> assign(:user_teams, Teams.list_by_user_id(conn.assigns.current_user.id))
   end
 
   defp get_default_team(socket) do
     current_user = socket.assigns.current_user
 
     if current_user do
-      team_query = from t in Teams.TeamUser, where: t.user_id == ^socket.assigns.current_user.id
+      team_query =
+        from t in Teams.TeamUser, where: t.user_id == ^socket.assigns.current_user.id, limit: 1
 
       team = Repo.one!(team_query, skip_team_id: true)
 
