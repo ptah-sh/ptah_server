@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/ptah-sh/ptah_server/compare/v1.6.1...v1.6.2) (2024-06-13)
+
+
+### Bug Fixes
+
+* [#54](https://github.com/ptah-sh/ptah_server/issues/54) sort routes by specificality ([54183f3](https://github.com/ptah-sh/ptah_server/commit/54183f39ee56153bb0defda2b39a710fa55b70ec))
+
 ## [1.6.1](https://github.com/ptah-sh/ptah_server/compare/v1.6.0...v1.6.1) (2024-06-13)
 
 
