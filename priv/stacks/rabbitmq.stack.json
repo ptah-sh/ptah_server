@@ -1,0 +1,50 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "rabbitmq",
+  "version": "0.1.0",
+  "description": "RabbitMQ.",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "services": [
+    {
+      "name": "rabbitmq",
+      "description": "RabbitMQ Server.",
+      "image": "bitnami/rabbitmq:3.12",
+      "env": [
+        {
+          "name": "RABBITMQ_USERNAME",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "RABBITMQ_PASSWORD",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS",
+          "value": "true"
+        },
+        {
+          "name": "RABBITMQ_VHOSTS",
+          "value": "/prod /stage"
+        }
+      ],
+      "ports": [
+        {
+          "name": "admin",
+          "target": 15672,
+          "protocol": "tcp",
+          "description": "RabbitMQ Admin Port."
+        }
+      ],
+      "mounts": [
+        {
+          "name": "data",
+          "target": "/bitnami/rabbitmq",
+          "description": "RabbitMQ data directory. Should not be treated as a cache."
+        }
+      ]
+    }
+  ]
+}
