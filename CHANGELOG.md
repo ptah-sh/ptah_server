@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/ptah-sh/ptah_server/compare/v1.13.0...v1.14.0) (2024-06-15)
+
+
+### Features
+
+* [#76](https://github.com/ptah-sh/ptah_server/issues/76) add the transport_protocol field to all exposed services ([e93585a](https://github.com/ptah-sh/ptah_server/commit/e93585ad63089f3c1f1f98b821ad0ceb2d007b1f))
+
 ## [1.13.0](https://github.com/ptah-sh/ptah_server/compare/v1.12.0...v1.13.0) (2024-06-15)
 
 
