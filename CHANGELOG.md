@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.0](https://github.com/ptah-sh/ptah_server/compare/v1.12.0...v1.13.0) (2024-06-15)
+
+
+### Features
+
+* [#37](https://github.com/ptah-sh/ptah_server/issues/37) add db vars to the wordpress setup ([9ae0489](https://github.com/ptah-sh/ptah_server/commit/9ae0489be2ed8708175a3357ce5f2e7d97f1e0a2))
+* [#76](https://github.com/ptah-sh/ptah_server/issues/76) add support for deploying fastcgi apps ([63e1454](https://github.com/ptah-sh/ptah_server/commit/63e14546ba647b5580467396d212c94c55a46675))
+
 ## [1.12.0](https://github.com/ptah-sh/ptah_server/compare/v1.11.2...v1.12.0) (2024-06-15)
 
 
