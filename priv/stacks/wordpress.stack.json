@@ -9,7 +9,7 @@
   "license": "MIT",
   "services": [
     {
-      "name": "Wordpress",
+      "name": "wodrdpress",
       "description": "Wordpress App Stack.",
       "image": "bitnami/wordpress:6",
       "env": [
@@ -34,15 +34,26 @@
           "value": "ptah_sh"
         },
         {
-          "name": "WORDPRESS_ENABLE_HTTPS",
-          "value": "true"
+          "name": "DB_CHARACTER_SET",
+          "value": "utf8mb4"
+        },
+        {
+          "name": "DB_COLLATE",
+          "value": "utf8mb4_0900_ai_ci"
         },
         {
           "name": "WORDPRESS_ENABLE_REVERSE_PROXY",
           "value": "true"
         }
       ],
-      "ports": [],
+      "ports": [
+        {
+          "name": "http",
+          "target": 8080,
+          "protocol": "tcp",
+          "description": "Apache HTTP port"
+        }
+      ],
       "mounts": [
         {
           "name": "data",
