@@ -115,14 +115,48 @@ defmodule PtahServer.Services.Service do
         embeds_many :caddy, CaddyHandler, on_replace: :delete do
           def changeset(caddy, attrs) do
             caddy
-            |> cast(attrs, [:target_port, :domain, :published_port, :path])
-            |> validate_required([:target_port, :domain, :published_port, :path])
+            |> cast(attrs, [:transport_protocol, :target_port, :domain, :published_port, :path])
+            |> cast_embed(:transport_http)
+            |> cast_embed(:transport_fastcgi)
+            |> validate_required([
+              :transport_protocol,
+              :target_port,
+              :domain,
+              :published_port,
+              :path
+            ])
           end
 
+          field :transport_protocol, Ecto.Enum, values: [:http, :fastcgi]
           field :target_port, :integer
           field :domain, :string
           field :published_port, :integer
           field :path, :string
+
+          embeds_one :transport_http, HttpTransport, on_replace: :update do
+          end
+
+          embeds_one :transport_fastcgi, FastcgiTransport, on_replace: :update do
+            def changeset(fastcgi, attrs) do
+              fastcgi
+              |> cast(attrs, [:root])
+              |> validate_required([:root])
+              |> cast_embed(:env, sort_param: :env_sort, drop_param: :env_drop)
+            end
+
+            field :root, :string
+
+            embeds_many :env, Env, on_replace: :delete do
+              def changeset(env, attrs) do
+                env
+                |> cast(attrs, [:name, :value])
+                |> validate_required([:name, :value])
+              end
+
+              field :name, :string
+              field :value, :string
+            end
+          end
         end
       end
     end

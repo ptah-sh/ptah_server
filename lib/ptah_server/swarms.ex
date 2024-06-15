@@ -164,12 +164,13 @@ defmodule PtahServer.Swarms do
                 "handle" => [
                   %{
                     "handler" => "reverse_proxy",
+                    "transport" => get_transport_for_caddy(caddy),
                     "upstreams" => [
                       %{
                         "dial" => "#{service.name}.#{stack_name}:#{caddy.target_port}"
                       }
                     ],
-                    "headers" => get_headers_for_port(caddy.published_port)
+                    "headers" => get_headers_for_port(caddy.published_port, caddy.domain)
                   }
                 ]
               }
@@ -197,19 +198,51 @@ defmodule PtahServer.Swarms do
     }
   end
 
-  defp get_headers_for_port(443) do
+  defp get_headers_for_port(443, host) do
     %{
       "request" => %{
         "set" => %{
           "x-forwarded-proto" => ["https"],
           "x-forwarded-schema" => ["https"],
-          "x-forwarded-port" => ["443"]
+          "x-forwarded-port" => ["443"],
+          "x-forwarded-host" => [host]
         }
       }
     }
   end
 
-  defp get_headers_for_port(_port) do
+  defp get_headers_for_port(_port, _host) do
     %{}
+  end
+
+  defp get_transport_for_caddy(caddy) do
+    case caddy.transport_protocol do
+      :http -> get_transport(:http, caddy.transport_http)
+      :fastcgi -> get_transport(:fastcgi, caddy.transport_fastcgi)
+    end
+  end
+
+  defp get_transport(:http, _transport) do
+    %{
+      "protocol" => "http"
+    }
+  end
+
+  defp get_transport(:fastcgi, transport) do
+    %{
+      "protocol" => "fastcgi",
+      "root" => transport.root,
+      # "env" => %{
+      #   "SCRIPT_FILENAME" => "/app/public/index.php"
+      # }
+      "env" =>
+        Enum.reduce(transport.env, %{}, fn env, acc -> Map.put(acc, env.name, env.value) end)
+    }
+  end
+
+  defp get_transport(_, _) do
+    %{
+      "protocol" => "http"
+    }
   end
 end
