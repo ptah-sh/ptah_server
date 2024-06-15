@@ -1,0 +1,55 @@
+{
+  "$schema": "https://ptah.sh/marketplace/schemas/stack-0.0.1.json",
+
+  "name": "wordpress",
+  "version": "0.1.0",
+  "description": "Wordpress.",
+  "author": "Bohdan Shulha <b.shulha@pm.me>",
+  "homepage": "https://ptah.sh",
+  "license": "MIT",
+  "services": [
+    {
+      "name": "Wordpress",
+      "description": "Wordpress App Stack.",
+      "image": "bitnami/wordpress:6",
+      "env": [
+        {
+          "name": "WORDPRESS_DATABASE_HOST",
+          "value": "mysql.mysql"
+        },
+        {
+          "name": "WORDPRESS_DATABASE_PORT_NUMBER",
+          "value": "3306"
+        },
+        {
+          "name": "WORDPRESS_DATABASE_USER",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "WORDPRESS_DATABASE_PASSWORD",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "WORDPRESS_DATABASE_NAME",
+          "value": "ptah_sh"
+        },
+        {
+          "name": "WORDPRESS_ENABLE_HTTPS",
+          "value": "true"
+        },
+        {
+          "name": "WORDPRESS_ENABLE_REVERSE_PROXY",
+          "value": "true"
+        }
+      ],
+      "ports": [],
+      "mounts": [
+        {
+          "name": "data",
+          "target": "/bitnami/wordpress",
+          "description": "Wordpress data directory. Should not be treated as a cache."
+        }
+      ]
+    }
+  ]
+}
