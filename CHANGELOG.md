@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/ptah-sh/ptah_server/compare/v1.11.2...v1.12.0) (2024-06-15)
+
+
+### Features
+
+* [#37](https://github.com/ptah-sh/ptah_server/issues/37) add wordpress stack ([26e493c](https://github.com/ptah-sh/ptah_server/commit/26e493c335b6143a068a3356b3bcd627aa39e292))
+
 ## [1.11.2](https://github.com/ptah-sh/ptah_server/compare/v1.11.1...v1.11.2) (2024-06-15)
 
 
