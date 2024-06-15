@@ -39,7 +39,7 @@
         },
         {
           "name": "MYSQL_COLLATE",
-          "value": "utf8mb4"
+          "value": "utf8mb4_0900_ai_ci"
         }
       ],
       "ports": [

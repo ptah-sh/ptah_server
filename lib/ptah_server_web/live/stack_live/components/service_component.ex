@@ -63,6 +63,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
               >
                 Add
               </.button>
+
+              <input type="hidden" name={"#{container_spec[:env_drop].name}[]"} value="old" />
             </div>
 
             <table>
@@ -103,12 +105,20 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
             >
               Add
             </.button>
+
+            <input type="hidden" name={"#{endpoint_spec[:ports_drop].name}[]"} value="old" />
           </div>
           <table>
             <tbody>
               <.inputs_for :let={port_spec} field={endpoint_spec[:ports]}>
                 <tr>
                   <td>
+                    <input
+                      type="hidden"
+                      name={"#{endpoint_spec[:ports_sort].name}[]"}
+                      value={port_spec.index}
+                    />
+
                     <.input field={port_spec[:target_port]} type="text" label="Target Port" />
                   </td>
                   <td>
@@ -139,6 +149,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
             >
               Add
             </.button>
+
+            <input type="hidden" name={"#{endpoint_spec[:caddy_drop].name}[]"} value="old" />
           </div>
           <table>
             <tbody>
@@ -194,6 +206,8 @@ defmodule PtahServerWeb.StackLive.Components.ServiceComponent do
               >
                 Add
               </.button>
+
+              <input type="hidden" name={"#{container_spec[:mounts_drop].name}[]"} value="old" />
 
               <table>
                 <tbody>

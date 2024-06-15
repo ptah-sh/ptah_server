@@ -92,7 +92,7 @@ defmodule PtahServer.Services.Service do
         end
       end
 
-      embeds_one :endpoint_spec, EndpointSpec do
+      embeds_one :endpoint_spec, EndpointSpec, on_replace: :update do
         def changeset(endpoint_spec, attrs) do
           endpoint_spec
           |> cast(attrs, [])

@@ -82,6 +82,8 @@ defmodule PtahServerWeb.StackLive.FormComponent do
             >
               Add
             </.button>
+
+            <input type="hidden" name={"#{@form[:services_drop].name}[]"} value="old" />
           </div>
 
           <%!-- <.error :for={msg <- Enum.map(@form[:services].errors, &CoreComponents.translate_error(&1))}>
