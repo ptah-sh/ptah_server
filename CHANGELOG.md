@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.2](https://github.com/ptah-sh/ptah_server/compare/v1.11.1...v1.11.2) (2024-06-15)
+
+
+### Bug Fixes
+
+* [#71](https://github.com/ptah-sh/ptah_server/issues/71) allow to delete the last one port, mount or whatever else ([501cf43](https://github.com/ptah-sh/ptah_server/commit/501cf434020f9cc3be7d14b8327a7fa7e0a9a496))
+
 ## [1.11.1](https://github.com/ptah-sh/ptah_server/compare/v1.11.0...v1.11.1) (2024-06-13)
 
 

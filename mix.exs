@@ -4,7 +4,7 @@ defmodule PtahServer.MixProject do
   def project do
     [
       app: :ptah_server,
-      version: "1.11.1",
+      version: "1.11.2",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
