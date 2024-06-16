@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.0](https://github.com/ptah-sh/ptah_server/compare/v1.14.0...v1.15.0) (2024-06-16)
+
+
+### Features
+
+* [#79](https://github.com/ptah-sh/ptah_server/issues/79) allow to set the desired number of replicas ([7442851](https://github.com/ptah-sh/ptah_server/commit/7442851d86b7d7ab2df13e817be6a33c7275f00b))
+* [#81](https://github.com/ptah-sh/ptah_server/issues/81) add pgbouncer to the postgresql stack template ([bebd5e0](https://github.com/ptah-sh/ptah_server/commit/bebd5e09fe8d91f54e9dca86b71644410dc0b977))
+
 ## [1.14.0](https://github.com/ptah-sh/ptah_server/compare/v1.13.0...v1.14.0) (2024-06-15)
 
 
