@@ -9,7 +9,7 @@
   "license": "MIT",
   "services": [
     {
-      "name": "wodrdpress",
+      "name": "wordpress",
       "description": "Wordpress App Stack.",
       "image": "bitnami/wordpress:6",
       "env": [

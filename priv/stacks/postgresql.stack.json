@@ -44,6 +44,57 @@
           "description": "PostgreSQL persistence base directory."
         }
       ]
+    },
+    {
+      "name": "pool",
+      "description": "PgBouncer.",
+      "image": "bitnami/pgbouncer:latest",
+      "env": [
+        {
+          "name": "PGBOUNCER_DATABASE",
+          "value": "ptah_sh",
+          "description": "PgBouncer advertised database."
+        },
+        {
+          "name": "PGBOUNCER_PORT",
+          "value": "5432",
+          "description": "PgBouncer port."
+        },
+        {
+          "name": "PGBOUNCER_POOL_MODE",
+          "value": "transaction",
+          "description": "PgBouncer pool mode. Allowed values: session (default), transaction and statement."
+        },
+        {
+          "name": "POSTGRESQL_HOST",
+          "value": "postgresql",
+          "description": "PostgreSQL backend hostname."
+        },
+        {
+          "name": "POSTGRESQL_DATABASE",
+          "value": "ptah_sh",
+          "description": "Default PostgreSQL database."
+        },
+        {
+          "name": "POSTGRESQL_USERNAME",
+          "value": "ptah_sh",
+          "description": "PostgreSQL backend default username."
+        },
+        {
+          "name": "POSTGRESQL_PASSWORD",
+          "value": "ptah_sh",
+          "description": "Password for the PostgreSQL created user."
+        }
+      ],
+      "ports": [
+        {
+          "name": "db",
+          "target": 5432,
+          "protocol": "tcp",
+          "description": "PostgreSQL port"
+        }
+      ],
+      "mounts": []
     }
   ]
 }
