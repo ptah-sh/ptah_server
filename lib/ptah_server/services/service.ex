@@ -19,6 +19,7 @@ defmodule PtahServer.Services.Service do
         |> cast(attrs, [:bind_volumes, :placement_server_id])
         |> cast_embed(:endpoint_spec, required: true)
         |> cast_embed(:task_template, required: true)
+        |> cast_embed(:mode, required: true)
         |> validate_required_server_if_volumes_bound()
       end
 
@@ -89,6 +90,25 @@ defmodule PtahServer.Services.Service do
             field :name, :string
             field :target, :string
           end
+        end
+      end
+
+      embeds_one :mode, Mode, on_replace: :update do
+        def changeset(mode, attrs) do
+          mode
+          |> cast(attrs, [])
+          |> cast_embed(:replicated, required: true)
+        end
+
+        embeds_one :replicated, Replicated, on_replace: :update do
+          def changeset(replicated, attrs) do
+            replicated
+            |> cast(attrs, [:replicas])
+            |> validate_required([:replicas])
+            |> validate_number(:replicas, greater_than_or_equal_to: 0)
+          end
+
+          field :replicas, :integer
         end
       end
 

@@ -22,6 +22,18 @@
   </h3>
 
   <.inputs_for :let={spec_field} field={@field[:spec]}>
+    <.inputs_for :let={mode_spec} field={spec_field[:mode]}>
+      <.inputs_for :let={replicated_spec} field={mode_spec[:replicated]}>
+        <.input field={replicated_spec[:replicas]} type="number" label="Replicas" min="0" />
+
+        <%= if replicated_spec[:replicas].value == 0 do %>
+          <small>
+            Replicas set to 0 - the service will not be launched on the Swarm cluster.
+          </small>
+        <% end %>
+      </.inputs_for>
+    </.inputs_for>
+
     <.inputs_for :let={task_template} field={spec_field[:task_template]}>
       <.inputs_for :let={container_spec} field={task_template[:container_spec]}>
         <.input

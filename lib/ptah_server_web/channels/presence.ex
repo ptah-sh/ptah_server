@@ -276,7 +276,7 @@ defmodule PtahServerWeb.Presence do
       },
       mode: %ServiceSpec.Mode{
         replicated: %ServiceSpec.Mode.Replicated{
-          replicas: 1
+          replicas: service.spec.mode.replicated.replicas
         }
       },
       endpoint_spec: %ServiceSpec.EndpointSpec{
