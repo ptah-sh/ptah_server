@@ -1,0 +1,48 @@
+<.header>
+  Listing Tls certs
+  <:actions>
+    <.link patch={~p"/teams/#{@current_team}/tls_certs/new"}>
+      <.button>New Tls cert</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="tls_certs"
+  rows={@streams.tls_certs}
+  row_click={
+    fn {_id, tls_cert} -> JS.navigate(~p"/teams/#{@current_team}/tls_certs/#{tls_cert}") end
+  }
+>
+  <:col :let={{_id, tls_cert}} label="Name"><%= tls_cert.name %></:col>
+  <:action :let={{_id, tls_cert}}>
+    <div class="sr-only">
+      <.link navigate={~p"/teams/#{@current_team}/tls_certs/#{tls_cert}"}>Show</.link>
+    </div>
+    <.link patch={~p"/teams/#{@current_team}/tls_certs/#{tls_cert}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, tls_cert}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: tls_cert.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="tls_cert-modal"
+  show
+  on_cancel={JS.patch(~p"/teams/#{@current_team}/tls_certs")}
+>
+  <.live_component
+    module={PtahServerWeb.TlsCertLive.FormComponent}
+    id={@tls_cert.id || :new}
+    title={@page_title}
+    action={@live_action}
+    tls_cert={@tls_cert}
+    patch={~p"/teams/#{@current_team}/tls_certs"}
+  />
+</.modal>

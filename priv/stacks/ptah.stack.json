@@ -55,6 +55,14 @@
           "target": "/config",
           "description": "Caddy config directory."
         }
+      ],
+      "secrets": [],
+      "configs": [
+        {
+          "target": "/ptah/caddy/tls/.keep",
+          "data": "# DO NOT REMOVE\n\n# DO NOT EDIT\n\nThis file is needed to create the Caddy's folder to mount custom TLS certificates and keys into.",
+          "description": "This file is needed to create the Caddy folder to mount custom TLS certificates and keys into."
+        }
       ]
     }
   ]

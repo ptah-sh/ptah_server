@@ -1,6 +1,7 @@
 <div>
   <h3 class="text-lg border-t-2">
-    Service: <.input field={@field[:name]} type="text" label="Name" disabled={@action != :new} />
+    <.input field={@field[:swarm_id]} type="hidden" value={@swarm_id} /> Service:
+    <.input field={@field[:name]} type="text" label="Name" disabled={@action != :new} />
 
     <small :if={@action != :new}>
       Services can not be renamed.
@@ -36,6 +37,8 @@
 
     <.inputs_for :let={task_template} field={spec_field[:task_template]}>
       <.inputs_for :let={container_spec} field={task_template[:container_spec]}>
+        <.inputs_for :let={_secrets_spec} field={container_spec[:secrets]}></.inputs_for>
+
         <.input
           field={container_spec[:docker_registry_id]}
           type="select"
@@ -44,6 +47,56 @@
         />
 
         <.input field={container_spec[:image]} type="text" label="Image" />
+
+        <div>
+          Docker Configs
+          <.button
+            type="button"
+            name={"#{container_spec[:configs_sort].name}[]"}
+            phx-value="new"
+            phx-click={JS.dispatch("change")}
+          >
+            Add
+          </.button>
+
+          <input type="hidden" name={"#{container_spec[:configs_drop].name}[]"} value="old" />
+        </div>
+
+        <table>
+          <tbody>
+            <.inputs_for :let={config_spec} field={container_spec[:configs]}>
+              <tr>
+                <td>
+                  <.input field={config_spec[:target]} type="text" label="Target" />
+                </td>
+                <td>
+                  <.button
+                    type="button"
+                    name={"#{container_spec[:configs_drop].name}[]"}
+                    value={config_spec.index}
+                    phx-click={JS.dispatch("change")}
+                  >
+                    Remove
+                  </.button>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <.debug value={config_spec[:config]} />
+                  <.inputs_for :let={config} field={config_spec[:config]}>
+                    <.input field={config[:swarm_id]} type="hidden" value={@swarm_id} />
+                    <.input
+                      field={config[:name]}
+                      type="hidden"
+                      value={"svg-#{@stack_name}-#{@field[:name].value}"}
+                    />
+                    <.input field={config[:data]} type="textarea" label="Data" />
+                  </.inputs_for>
+                </td>
+              </tr>
+            </.inputs_for>
+          </tbody>
+        </table>
 
         <div>
           Environment Variables

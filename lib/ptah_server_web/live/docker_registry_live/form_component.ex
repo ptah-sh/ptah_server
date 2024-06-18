@@ -99,18 +99,26 @@ defmodule PtahServerWeb.DockerRegistryLive.FormComponent do
       name:
         "registry-credentials-#{docker_registry_params["swarm_id"]}-#{docker_registry_params["name"]}",
       swarm_id: String.to_integer(docker_registry_params["swarm_id"]),
-      team_id: Repo.get_team_id()
+      team_id: Repo.get_team_id(),
+      data:
+        Jason.encode!(%{
+          username: docker_registry_params["username"],
+          serveraddress: docker_registry_params["endpoint"]
+        })
     }
 
     case DockerRegistries.create_docker_registry(docker_registry_params, docker_config_params) do
       {:ok, docker_registry} ->
         notify_parent({:saved, docker_registry})
 
-        Presence.docker_config_create(docker_registry.config, %{
-          username: docker_registry.username,
-          password: docker_registry.password,
-          serveraddress: docker_registry.endpoint
-        })
+        Presence.docker_config_create(
+          docker_registry.config,
+          Jason.encode!(%{
+            username: docker_registry.username,
+            password: docker_registry.password,
+            serveraddress: docker_registry.endpoint
+          })
+        )
 
         {:noreply,
          socket

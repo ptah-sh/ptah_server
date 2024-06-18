@@ -1,4 +1,5 @@
 defmodule PtahServer.Services.Service do
+  alias PtahServer.Repo
   require Logger
   use Ecto.Schema
   import Ecto.Changeset
@@ -11,6 +12,7 @@ defmodule PtahServer.Services.Service do
 
     belongs_to :team, PtahServer.Teams.Team
     belongs_to :stack, PtahServer.Stacks.Stack
+    belongs_to :swarm, PtahServer.Swarms.Swarm
 
     # TODO: extract changesets to maintain better readability
     embeds_one :spec, ServiceSpec, on_replace: :update do
@@ -59,6 +61,8 @@ defmodule PtahServer.Services.Service do
             |> cast(attrs, [:docker_registry_id, :image])
             |> cast_embed(:env, sort_param: :env_sort, drop_param: :env_drop)
             |> cast_embed(:mounts, sort_param: :mounts_sort, drop_param: :mounts_drop)
+            |> cast_embed(:secrets, sort_param: :secrets_sort, drop_param: :secrets_drop)
+            |> cast_embed(:configs, sort_param: :configs_sort, drop_param: :configs_drop)
             |> validate_required([:image])
 
             #     # |> cast(attrs, [:name, :image, :hostname])
@@ -89,6 +93,39 @@ defmodule PtahServer.Services.Service do
 
             field :name, :string
             field :target, :string
+          end
+
+          embeds_many :secrets, SecretSpec, on_replace: :delete do
+            def changeset(secret_spec, attrs) do
+              secret_spec
+              |> Repo.preload(:secret)
+              |> cast(attrs, [:target])
+              |> cast_assoc(:secret,
+                required: true,
+                with: &PtahServer.DockerSecrets.DockerSecret.changeset/2
+              )
+              |> validate_required([:target])
+            end
+
+            field :target, :string
+
+            belongs_to :secret, PtahServer.DockerSecrets.DockerSecret, on_replace: :delete
+          end
+
+          embeds_many :configs, ConfigSpec, on_replace: :delete do
+            def changeset(config_spec, attrs) do
+              config_spec
+              |> cast(attrs, [:target])
+              |> cast_assoc(:config,
+                required: true,
+                with: &PtahServer.DockerConfigs.DockerConfig.changeset/2
+              )
+              |> validate_required([:target])
+            end
+
+            field :target, :string
+
+            belongs_to :config, PtahServer.DockerConfigs.DockerConfig
           end
         end
       end
@@ -135,7 +172,14 @@ defmodule PtahServer.Services.Service do
         embeds_many :caddy, CaddyHandler, on_replace: :delete do
           def changeset(caddy, attrs) do
             caddy
-            |> cast(attrs, [:transport_protocol, :target_port, :domain, :published_port, :path])
+            |> cast(attrs, [
+              :transport_protocol,
+              :target_port,
+              :domain,
+              :published_port,
+              :path
+              # :tls_cert_id
+            ])
             |> cast_embed(:transport_http)
             |> cast_embed(:transport_fastcgi)
             |> validate_required([
@@ -152,6 +196,8 @@ defmodule PtahServer.Services.Service do
           field :domain, :string
           field :published_port, :integer
           field :path, :string
+
+          # belongs_to :tls_cert, PtahServer.TlsCerts.TlsCert
 
           embeds_one :transport_http, HttpTransport, on_replace: :update do
           end
@@ -187,12 +233,12 @@ defmodule PtahServer.Services.Service do
   @doc false
   def changeset(service, attrs) do
     service
-    |> cast(attrs, [:name, :service_name, :ext_id])
+    |> cast(attrs, [:name, :service_name, :swarm_id])
     |> cast_embed(:spec,
       with: &PtahServer.Services.Service.ServiceSpec.changeset/2,
       required: true
     )
-    |> validate_required([:name])
+    |> validate_required([:name, :swarm_id])
     |> maybe_put_team_id()
   end
 end

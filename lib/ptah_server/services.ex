@@ -101,4 +101,12 @@ defmodule PtahServer.Services do
   def change_service(%Service{} = service, attrs \\ %{}) do
     Service.changeset(service, attrs)
   end
+
+  def get_caddy!(swarm) do
+    Repo.one!(
+      from s in Service,
+        join: stack in assoc(s, :stack),
+        where: s.swarm_id == ^swarm.id and stack.name == "ptah" and s.name == "caddy"
+    )
+  end
 end

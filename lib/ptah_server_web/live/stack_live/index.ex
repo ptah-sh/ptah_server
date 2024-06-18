@@ -18,7 +18,11 @@ defmodule PtahServerWeb.StackLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Stack")
-    |> assign(:stack, Stacks.get_stack!(id) |> Repo.preload(:services))
+    |> assign(
+      :stack,
+      Stacks.get_stack!(id)
+      |> Repo.preload(services: [spec: [task_template: [container_spec: [configs: [:config]]]]])
+    )
   end
 
   defp apply_action(socket, :new, _params) do

@@ -56,7 +56,9 @@
           "target": "/bitnami/mysql",
           "description": "MySQL data directory. Should not be treated as a cache."
         }
-      ]
+      ],
+      "secrets": [],
+      "configs": []
     }
   ]
 }

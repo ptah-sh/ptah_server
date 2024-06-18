@@ -1,4 +1,7 @@
 defmodule PtahServerAgent.AgentChannel do
+  alias PtahServer.Swarms
+  alias PtahServer.Services
+  alias PtahServer.DockerSecrets.DockerSecret
   alias PtahServer.DockerConfigs.DockerConfig
   alias PtahServer.Servers
   alias PtahServer.Services.Service
@@ -71,7 +74,17 @@ defmodule PtahServerAgent.AgentChannel do
   end
 
   @impl PtahProto
-  def handle_packet(%Event.ServiceUpdated{} = _payload, socket) do
+  def handle_packet(%Event.ServiceUpdated{} = payload, socket) do
+    service = Services.get_service!(payload.service_id) |> Repo.preload(:swarm)
+
+    caddy = Services.get_caddy!(service.swarm)
+
+    if service.id == caddy.id do
+      Logger.info("caddy updated on swarm #{service.swarm.id}, loading caddy config")
+
+      Swarms.load_caddy_config(service.swarm)
+    end
+
     {:noreply, socket}
   end
 
@@ -107,6 +120,18 @@ defmodule PtahServerAgent.AgentChannel do
     {:ok, _} =
       config
       |> Ecto.Changeset.change(ext_id: packet.docker.config_id)
+      |> Repo.update()
+
+    {:noreply, socket}
+  end
+
+  @impl PtahProto
+  def handle_packet(%Event.SecretCreated{} = packet, socket) do
+    secret = Repo.get_by(DockerSecret, id: packet.secret_id)
+
+    {:ok, _} =
+      secret
+      |> Ecto.Changeset.change(ext_id: packet.docker.secret_id)
       |> Repo.update()
 
     {:noreply, socket}

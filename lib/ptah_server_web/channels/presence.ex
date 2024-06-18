@@ -203,6 +203,10 @@ defmodule PtahServerWeb.Presence do
 
     manager = get_swarm_manager!(Repo.preload(service.stack, :swarm).swarm)
 
+    Logger.info(
+      "Updating service #{inspect(map_service_spec(service.stack, service), pretty: true)}"
+    )
+
     AgentChannel.push(manager.socket, %Cmd.UpdateService{
       service_id: service.id,
       docker: %Cmd.UpdateService.Docker{
@@ -251,7 +255,28 @@ defmodule PtahServerWeb.Presence do
                   ]),
                 target: mount.target
               }
-            end)
+            end),
+          secrets:
+            Enum.map(service.spec.task_template.container_spec.secrets, fn secret ->
+              %ServiceSpec.TaskTemplate.ContainerSpec.Secret{
+                file: %ServiceSpec.TaskTemplate.ContainerSpec.File{
+                  name: secret.target
+                },
+                secret_id: Repo.preload(secret, :secret).secret.ext_id
+              }
+            end),
+          configs:
+            Enum.map(
+              Repo.preload(service.spec.task_template.container_spec.configs, :config),
+              fn config ->
+                %ServiceSpec.TaskTemplate.ContainerSpec.Config{
+                  file: %ServiceSpec.TaskTemplate.ContainerSpec.File{
+                    name: config.target
+                  },
+                  config_id: Repo.preload(config, :config).config.ext_id
+                }
+              end
+            )
         },
         networks: [
           %ServiceSpec.TaskTemplate.Network{
@@ -294,13 +319,23 @@ defmodule PtahServerWeb.Presence do
     }
   end
 
-  def docker_config_create(config, data) do
+  def docker_config_create(config, override_data \\ nil) do
     manager = get_swarm_manager!(Repo.preload(config, :swarm).swarm)
 
     AgentChannel.push(manager.socket, %Cmd.CreateConfig{
       config_id: config.id,
       name: config.name,
-      data: data
+      data: override_data || config.data
+    })
+  end
+
+  def docker_secret_create(secret) do
+    manager = get_swarm_manager!(Repo.preload(secret, :swarm).swarm)
+
+    AgentChannel.push(manager.socket, %Cmd.CreateSecret{
+      secret_id: secret.id,
+      name: secret.name,
+      data: secret.data
     })
   end
 
