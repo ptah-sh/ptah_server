@@ -34,7 +34,9 @@
           "description": "Ptah HTTP port."
         }
       ],
-      "mounts": []
+      "mounts": [],
+      "secrets": [],
+      "configs": []
     }
   ]
 }

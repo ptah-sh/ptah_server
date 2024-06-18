@@ -9,6 +9,7 @@ defmodule PtahServer.Swarms.Swarm do
     field :ext_id, :string
 
     has_many :stacks, PtahServer.Stacks.Stack
+    has_many :tls_certs, PtahServer.TlsCerts.TlsCert
 
     timestamps(type: :utc_datetime)
   end

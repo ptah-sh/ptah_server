@@ -43,7 +43,9 @@
           "target": "/bitnami/postgresql",
           "description": "PostgreSQL persistence base directory."
         }
-      ]
+      ],
+      "secrets": [],
+      "configs": []
     },
     {
       "name": "pool",
@@ -94,7 +96,9 @@
           "description": "PostgreSQL port"
         }
       ],
-      "mounts": []
+      "mounts": [],
+      "secrets": [],
+      "configs": []
     }
   ]
 }

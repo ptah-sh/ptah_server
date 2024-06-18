@@ -18,7 +18,6 @@ defmodule PtahServer.Changeset do
 
   def validate_unique_in_team(changeset, fields) do
     changeset
-    |> maybe_put_team_id()
     |> validate_unique(fields ++ [:team_id])
   end
 end

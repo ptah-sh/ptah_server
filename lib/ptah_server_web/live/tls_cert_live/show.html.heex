@@ -1,0 +1,27 @@
+<.header>
+  Tls cert <%= @tls_cert.id %>
+  <:subtitle>This is a tls_cert record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/tls_certs/#{@tls_cert}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit tls_cert</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @tls_cert.name %></:item>
+  <:item title="Cert"><%= @tls_cert.cert %></:item>
+</.list>
+
+<.back navigate={~p"/tls_certs"}>Back to tls_certs</.back>
+
+<.modal :if={@live_action == :edit} id="tls_cert-modal" show on_cancel={JS.patch(~p"/tls_certs/#{@tls_cert}")}>
+  <.live_component
+    module={PtahServerWeb.TlsCertLive.FormComponent}
+    id={@tls_cert.id}
+    title={@page_title}
+    action={@live_action}
+    tls_cert={@tls_cert}
+    patch={~p"/tls_certs/#{@tls_cert}"}
+  />
+</.modal>

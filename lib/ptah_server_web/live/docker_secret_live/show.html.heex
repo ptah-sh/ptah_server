@@ -1,0 +1,35 @@
+<.header>
+  Docker secret <%= @docker_secret.id %>
+  <:subtitle>This is a docker_secret record from your database.</:subtitle>
+  <:actions>
+    <.link
+      patch={~p"/teams/#{@current_team}/docker_secrets/#{@docker_secret}/show/edit"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Edit docker_secret</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @docker_secret.name %></:item>
+  <:item title="Ext"><%= @docker_secret.ext_id %></:item>
+</.list>
+
+<.back navigate={~p"/teams/#{@current_team}/docker_secrets"}>Back to docker_secrets</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="docker_secret-modal"
+  show
+  on_cancel={JS.patch(~p"/teams/#{@current_team}/docker_secrets/#{@docker_secret}")}
+>
+  <.live_component
+    module={PtahServerWeb.DockerSecretLive.FormComponent}
+    id={@docker_secret.id}
+    title={@page_title}
+    action={@live_action}
+    docker_secret={@docker_secret}
+    patch={~p"/teams/#{@current_team}/docker_secrets/#{@docker_secret}"}
+  />
+</.modal>

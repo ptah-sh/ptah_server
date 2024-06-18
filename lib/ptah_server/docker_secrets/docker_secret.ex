@@ -1,24 +1,25 @@
-defmodule PtahServer.DockerConfigs.DockerConfig do
+defmodule PtahServer.DockerSecrets.DockerSecret do
   use Ecto.Schema
   import Ecto.Changeset
   import PtahServer.Changeset
 
-  schema "docker_configs" do
+  schema "docker_secrets" do
     field :name, PtahServer.Ecto.Slug
     field :ext_id, :string
-    field :data, :string, redact: true
 
     belongs_to :team, PtahServer.Teams.Team
     belongs_to :swarm, PtahServer.Swarms.Swarm
+
+    field :data, :string, virtual: true, redact: true
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(docker_config, attrs) do
-    docker_config
-    |> cast(attrs, [:swarm_id, :name, :data])
-    |> validate_required([:swarm_id, :name, :data])
+  def changeset(docker_secret, attrs) do
+    docker_secret
+    |> cast(attrs, [:name, :swarm_id, :data])
+    |> validate_required([:name, :swarm_id, :data])
     |> maybe_put_team_id()
   end
 end

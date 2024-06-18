@@ -147,12 +147,26 @@ defmodule PtahServerWeb.Router do
         live "/docker_configs/:id", DockerConfigLive.Show, :show
         live "/docker_configs/:id/show/edit", DockerConfigLive.Show, :edit
 
+        live "/docker_secrets", DockerSecretLive.Index, :index
+        live "/docker_secrets/new", DockerSecretLive.Index, :new
+        live "/docker_secrets/:id/edit", DockerSecretLive.Index, :edit
+
+        live "/docker_secrets/:id", DockerSecretLive.Show, :show
+        live "/docker_secrets/:id/show/edit", DockerSecretLive.Show, :edit
+
         live "/docker_registries", DockerRegistryLive.Index, :index
         live "/docker_registries/new", DockerRegistryLive.Index, :new
         live "/docker_registries/:id/edit", DockerRegistryLive.Index, :edit
 
         live "/docker_registries/:id", DockerRegistryLive.Show, :show
         live "/docker_registries/:id/show/edit", DockerRegistryLive.Show, :edit
+
+        live "/tls_certs", TlsCertLive.Index, :index
+        live "/tls_certs/new", TlsCertLive.Index, :new
+        live "/tls_certs/:id/edit", TlsCertLive.Index, :edit
+
+        live "/tls_certs/:id", TlsCertLive.Show, :show
+        live "/tls_certs/:id/show/edit", TlsCertLive.Show, :edit
       end
     end
   end

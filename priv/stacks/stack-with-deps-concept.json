@@ -58,7 +58,10 @@
           "protocol": "tcp",
           "description": "Ptah HTTP port."
         }
-      ]
+      ],
+      "mounts": [],
+      "secrets": [],
+      "configs": []
     }
   ]
 }

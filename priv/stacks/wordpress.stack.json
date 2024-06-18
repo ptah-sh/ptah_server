@@ -60,7 +60,9 @@
           "target": "/bitnami/wordpress",
           "description": "Wordpress data directory. Should not be treated as a cache."
         }
-      ]
+      ],
+      "secrets": [],
+      "configs": []
     }
   ]
 }

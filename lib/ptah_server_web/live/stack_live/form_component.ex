@@ -1,6 +1,5 @@
 defmodule PtahServerWeb.StackLive.FormComponent do
   require Logger
-  alias PtahServer.Stacks.Stack
   alias PtahServerWeb.Presence
   alias PtahServerWeb.StackLive.Components.ServiceComponent
   alias PtahServer.Marketplace
@@ -21,6 +20,7 @@ defmodule PtahServerWeb.StackLive.FormComponent do
       socket
       |> assign(:swarms, swarms)
       |> assign(:stacks, stacks)
+      |> assign(:default_swarm_id, List.first(swarms) |> elem(1))
 
     {:ok, socket}
   end
@@ -86,9 +86,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
             <input type="hidden" name={"#{@form[:services_drop].name}[]"} value="old" />
           </div>
 
-          <%!-- <.error :for={msg <- Enum.map(@form[:services].errors, &CoreComponents.translate_error(&1))}>
-            <%= msg %>
-          </.error> --%>
           <.errors for_field={@form[:services]} />
 
           <%!-- <p class="text-sm"><%= @stack_schema["description"] %></p> --%>
@@ -112,7 +109,7 @@ defmodule PtahServerWeb.StackLive.FormComponent do
                   :edit
                 end
               }
-              swarm_id={@form[:swarm_id].value}
+              swarm_id={@form[:swarm_id].value || @default_swarm_id}
               stack_name={@form[:name].value}
             />
           </.inputs_for>
@@ -129,10 +126,8 @@ defmodule PtahServerWeb.StackLive.FormComponent do
   @impl true
   def update(%{stack: stack} = assigns, socket) do
     changeset =
-      Stacks.change_stack(%Stack{
-        stack
-        | swarm_id: stack.swarm_id || List.first(socket.assigns.swarms) |> elem(1)
-      })
+      stack
+      |> Stacks.change_stack()
 
     {:ok,
      socket
@@ -142,6 +137,8 @@ defmodule PtahServerWeb.StackLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"stack" => stack_params}, socket) do
+    Logger.emergency("Stack params: #{inspect(stack_params, pretty: true)}")
+
     changeset =
       socket.assigns.stack
       |> Stacks.change_stack(stack_params)
@@ -159,8 +156,6 @@ defmodule PtahServerWeb.StackLive.FormComponent do
     params =
       if Map.has_key?(params, "services") do
         Map.update!(params, "services", fn services ->
-          Logger.debug("services: #{inspect(services)}")
-
           # TODO: move list to map conversion to the form initialization.
           #   Currently the form is initialized as a list, but it is being changed to map after first interaction with the form
           services =
@@ -292,6 +287,15 @@ defmodule PtahServerWeb.StackLive.FormComponent do
                       %{
                         "name" => mount["name"],
                         "target" => mount["target"]
+                      }
+                    end),
+                  "configs" =>
+                    Enum.map(service["configs"], fn secret ->
+                      %{
+                        "target" => secret["target"],
+                        "config" => %{
+                          "data" => secret["data"]
+                        }
                       }
                     end)
                 }

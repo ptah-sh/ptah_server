@@ -1,0 +1,51 @@
+<.header>
+  Listing Docker secrets
+  <:actions>
+    <.link patch={~p"/teams/#{@current_team}/docker_secrets/new"}>
+      <.button>New Docker secret</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="docker_secrets"
+  rows={@streams.docker_secrets}
+  row_click={
+    fn {_id, docker_secret} ->
+      JS.navigate(~p"/teams/#{@current_team}/docker_secrets/#{docker_secret}")
+    end
+  }
+>
+  <:col :let={{_id, docker_secret}} label="Name"><%= docker_secret.name %></:col>
+  <:col :let={{_id, docker_secret}} label="Ext"><%= docker_secret.ext_id %></:col>
+  <:action :let={{_id, docker_secret}}>
+    <div class="sr-only">
+      <.link navigate={~p"/teams/#{@current_team}/docker_secrets/#{docker_secret}"}>Show</.link>
+    </div>
+    <.link patch={~p"/teams/#{@current_team}/docker_secrets/#{docker_secret}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, docker_secret}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: docker_secret.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="docker_secret-modal"
+  show
+  on_cancel={JS.patch(~p"/teams/#{@current_team}/docker_secrets")}
+>
+  <.live_component
+    module={PtahServerWeb.DockerSecretLive.FormComponent}
+    id={@docker_secret.id || :new}
+    title={@page_title}
+    action={@live_action}
+    docker_secret={@docker_secret}
+    patch={~p"/teams/#{@current_team}/docker_secrets"}
+  />
+</.modal>

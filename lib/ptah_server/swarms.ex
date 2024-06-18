@@ -5,6 +5,9 @@ defmodule PtahServer.Swarms do
 
   import Ecto.Query, warn: false
   require Logger
+  alias PtahServer.Services.Service
+  alias PtahServer.Services
+  alias PtahServer.Swarms
   alias PtahServerWeb.Presence
   alias PtahServer.Repo
 
@@ -104,8 +107,53 @@ defmodule PtahServer.Swarms do
     Swarm.changeset(swarm, attrs)
   end
 
+  def list_tls_certs(swarm) do
+    Repo.preload(swarm, tls_certs: [:cert_config, :key_secret]).tls_certs
+    |> Enum.filter(fn tls_cert -> tls_cert.cert_config.ext_id != nil end)
+    |> Enum.filter(fn tls_cert -> tls_cert.key_secret.ext_id != nil end)
+  end
+
   # TODO: add default handler to return 404 instead of 200 for non-matched routes.
   def rebuild_caddy(%Swarm{} = swarm) do
+    caddy = Services.get_caddy!(swarm)
+
+    tls_certs = list_tls_certs(swarm)
+
+    {:ok, caddy} =
+      Services.change_service(caddy, %{
+        "spec" => %{
+          "task_template" => %{
+            "container_spec" => %{
+              "secrets" =>
+                (Enum.map(caddy.spec.task_template.container_spec.secrets, &Map.from_struct/1) ++
+                   Enum.map(tls_certs, fn tls_cert ->
+                     %{
+                       target: "/ptah/caddy/tls/#{tls_cert.name}.key",
+                       secret_id: tls_cert.key_secret_id
+                     }
+                   end))
+                |> Enum.uniq_by(fn secret -> secret.target end),
+              "configs" =>
+                (Enum.map(caddy.spec.task_template.container_spec.configs, &Map.from_struct/1) ++
+                   Enum.map(tls_certs, fn tls_cert ->
+                     %{
+                       target: "/ptah/caddy/tls/#{tls_cert.name}.crt",
+                       config_id: tls_cert.cert_config_id
+                     }
+                   end))
+                |> Enum.uniq_by(fn config -> config.target end)
+            }
+          }
+        }
+      })
+      |> Repo.update()
+
+    Presence.service_update(caddy)
+  end
+
+  def load_caddy_config(swarm) do
+    tls_certs = list_tls_certs(swarm)
+
     servers =
       Enum.map(Repo.preload(swarm, :stacks, skip_team_id: true).stacks, fn stack ->
         Enum.map(Repo.preload(stack, :services, skip_team_id: true).services, fn service ->
@@ -122,6 +170,14 @@ defmodule PtahServer.Swarms do
 
     config = %{
       "apps" => %{
+        "tls" => %{
+          "certificates" => %{
+            # "load_files" => map_tls_certs(tls_certs)
+            "load_folders" => [
+              "/ptah/caddy/tls"
+            ]
+          }
+        },
         "http" => %{
           "servers" =>
             Map.keys(servers)
@@ -244,5 +300,19 @@ defmodule PtahServer.Swarms do
     %{
       "protocol" => "http"
     }
+  end
+
+  # https://caddyserver.com/docs/json/apps/tls/certificates/load_files/
+  defp map_tls_certs(certs) do
+    Enum.reduce(certs, [], fn cert, acc ->
+      acc ++
+        [
+          %{
+            certificate: "/ptah/caddy/tls/#{cert.name}.crt",
+            key: "/ptah/caddy/tls/#{cert.name}.key",
+            format: "pem"
+          }
+        ]
+    end)
   end
 end
